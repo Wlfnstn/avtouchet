@@ -1,0 +1,55 @@
+# Ежедневно обновляет цены на топливо (prices.json) и публикует сайт на GitHub Pages.
+name: Цены на топливо и публикация
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Время в UTC: 05:30 = 10:30 и 07:30 = 12:30 по Алматы (источник обновляется утром)
+    - cron: "30 5 * * *"
+    - cron: "30 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Обновить цены на топливо
+        if: github.event_name != 'push'
+        run: python3 scripts/fetch_prices.py
+
+      - name: Сохранить prices.json в репозиторий
+        if: github.event_name != 'push'
+        run: |
+          if ! git diff --quiet -- prices.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add prices.json
+            git commit -m "Цены на топливо: $(python3 -c "import json;print(json.load(open('prices.json'))['date'])")"
+            git push
+          else
+            echo "Цены не изменились"
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

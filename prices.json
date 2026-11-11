@@ -1,0 +1,640 @@
+{
+ "date": "2026-11-11",
+ "fetched": "2026-11-11T20:18+05:00",
+ "source": "creditbureau.kz",
+ "sourceUrl": "https://creditbureau.kz/gas-stations/",
+ "avg": {
+  "ai92": 234,
+  "ai95": 287,
+  "ai98": 344,
+  "dt": 317,
+  "gas": 106
+ },
+ "networks": [
+  {
+   "name": "Helios",
+   "stations": 203,
+   "prices": {
+    "ai92": 250,
+    "ai95": 310,
+    "ai98": 346,
+    "dt": 352,
+    "gas": 106
+   }
+  },
+  {
+   "name": "Qazaq Oil",
+   "stations": 71,
+   "prices": {
+    "ai92": 167,
+    "ai95": 183,
+    "ai98": 199,
+    "dt": 184
+   }
+  },
+  {
+   "name": "Royal Petrol",
+   "stations": 62,
+   "prices": {
+    "ai92": 255,
+    "ai95": 316,
+    "ai98": 365,
+    "dt": 360,
+    "gas": 110
+   }
+  },
+  {
+   "name": "Алатау Премиум Мунай",
+   "stations": 61,
+   "prices": {
+    "ai92": 250,
+    "ai95": 311,
+    "ai98": 355,
+    "dt": 355
+   }
+  },
+  {
+   "name": "ГазOilПром",
+   "stations": 28,
+   "prices": {
+    "ai92": 251,
+    "ai95": 316,
+    "ai98": 344,
+    "dt": 345,
+    "gas": 112
+   }
+  },
+  {
+   "name": "Compass",
+   "stations": 17,
+   "prices": {
+    "ai92": 256,
+    "ai95": 327,
+    "ai98": 373,
+    "dt": 353,
+    "gas": 112
+   }
+  },
+  {
+   "name": "LIQUI MOLY",
+   "stations": 14,
+   "prices": {
+    "ai92": 250,
+    "ai95": 317,
+    "dt": 343,
+    "gas": 112
+   }
+  },
+  {
+   "name": "НЕФТЭК",
+   "stations": 11,
+   "prices": {
+    "ai92": 244,
+    "ai95": 329,
+    "dt": 347,
+    "gas": 85
+   }
+  },
+  {
+   "name": "S",
+   "stations": 10,
+   "prices": {
+    "ai92": 251,
+    "ai95": 313,
+    "dt": 352
+   }
+  },
+  {
+   "name": "Сокол",
+   "stations": 7,
+   "prices": {
+    "ai92": 253,
+    "ai95": 322,
+    "ai98": 365,
+    "dt": 358
+   }
+  },
+  {
+   "name": "PETROLUX",
+   "stations": 2,
+   "prices": {
+    "ai92": 247,
+    "ai95": 298,
+    "dt": 330
+   }
+  }
+ ],
+ "cities": {
+  "almaty": {
+   "name": "Алматы",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 255,
+    "ai95": 325,
+    "ai98": 368,
+    "dt": 358,
+    "gas": 112
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 48,
+     "prices": {
+      "ai92": 255,
+      "ai95": 323,
+      "ai98": 362,
+      "dt": 359,
+      "gas": 112
+     }
+    },
+    {
+     "name": "Royal Petrol",
+     "stations": 39,
+     "prices": {
+      "ai92": 255,
+      "ai95": 322,
+      "ai98": 365,
+      "dt": 359,
+      "gas": 112
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": 31,
+     "prices": {
+      "ai92": 169,
+      "ai95": 190,
+      "ai98": 199,
+      "dt": 188
+     }
+    },
+    {
+     "name": "Сокол",
+     "stations": 7,
+     "prices": {
+      "ai92": 253,
+      "ai95": 322,
+      "ai98": 365,
+      "dt": 358
+     }
+    },
+    {
+     "name": "Compass",
+     "stations": 5,
+     "prices": {
+      "ai92": 258,
+      "ai95": 332,
+      "ai98": 380,
+      "dt": 355,
+      "gas": 112
+     }
+    }
+   ]
+  },
+  "astana": {
+   "name": "Астана",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 254,
+    "ai95": 318,
+    "ai98": 359,
+    "dt": 352
+   },
+   "networks": [
+    {
+     "name": "Qazaq Oil",
+     "stations": 20,
+     "prices": {
+      "ai92": 169,
+      "ai95": 188,
+      "ai98": 196,
+      "dt": 185
+     }
+    },
+    {
+     "name": "Helios",
+     "stations": 14,
+     "prices": {
+      "ai92": 255,
+      "ai95": 317,
+      "ai98": 357,
+      "dt": 351
+     }
+    },
+    {
+     "name": "Алатау Премиум Мунай",
+     "stations": 7,
+     "prices": {
+      "ai92": 255,
+      "ai95": 315,
+      "ai98": 355,
+      "dt": 353
+     }
+    },
+    {
+     "name": "Compass",
+     "stations": 3,
+     "prices": {
+      "ai92": 253,
+      "ai95": 321,
+      "ai98": 365,
+      "dt": 351
+     }
+    }
+   ]
+  },
+  "shymkent": {
+   "name": "Шымкент",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 243,
+    "ai95": 306,
+    "ai98": 350,
+    "dt": 356
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 13,
+     "prices": {
+      "ai92": 240,
+      "ai95": 306,
+      "ai98": 350,
+      "dt": 356
+     }
+    },
+    {
+     "name": "Алатау Премиум Мунай",
+     "stations": 10,
+     "prices": {
+      "ai92": 245,
+      "ai95": 306,
+      "dt": 356
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 166,
+      "ai95": 186,
+      "ai98": 199,
+      "dt": 181
+     }
+    }
+   ]
+  },
+  "karaganda": {
+   "name": "Караганда",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 252,
+    "ai95": 316,
+    "ai98": 341,
+    "dt": 346,
+    "gas": 110
+   },
+   "networks": [
+    {
+     "name": "ГазOilПром",
+     "stations": 18,
+     "prices": {
+      "ai92": 251,
+      "ai95": 316,
+      "ai98": 344,
+      "dt": 345,
+      "gas": 112
+     }
+    },
+    {
+     "name": "Helios",
+     "stations": 12,
+     "prices": {
+      "ai92": 255,
+      "ai95": 316,
+      "ai98": 337,
+      "dt": 351,
+      "gas": 106
+     }
+    },
+    {
+     "name": "LIQUI MOLY",
+     "stations": 10,
+     "prices": {
+      "ai92": 250,
+      "ai95": 317,
+      "dt": 343,
+      "gas": 112
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 170,
+      "ai95": 189,
+      "ai98": 199,
+      "dt": 186
+     }
+    }
+   ]
+  },
+  "aktobe": {
+   "name": "Актобе",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 201,
+    "ai95": 236,
+    "ai98": 345,
+    "dt": 267
+   },
+   "networks": [
+    {
+     "name": "Qazaq Oil",
+     "stations": 20,
+     "prices": {
+      "ai92": 160,
+      "ai95": 174,
+      "ai98": 193,
+      "dt": 184
+     }
+    },
+    {
+     "name": "Helios",
+     "stations": 11,
+     "prices": {
+      "ai92": 242,
+      "ai95": 298,
+      "ai98": 345,
+      "dt": 350
+     }
+    }
+   ]
+  },
+  "atyrau": {
+   "name": "Атырау",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 198,
+    "ai95": 238,
+    "ai98": 337,
+    "dt": 263
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 10,
+     "prices": {
+      "ai92": 236,
+      "ai95": 296,
+      "ai98": 337,
+      "dt": 347
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 159,
+      "ai95": 180,
+      "ai98": 194,
+      "dt": 179
+     }
+    }
+   ]
+  },
+  "ust-kamenogorsk": {
+   "name": "Усть-Каменогорск",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 255,
+    "ai95": 314,
+    "ai98": 341,
+    "dt": 357
+   },
+   "networks": [
+    {
+     "name": "Royal Petrol",
+     "stations": 11,
+     "prices": {
+      "ai92": 255,
+      "ai95": 314,
+      "dt": 357
+     }
+    },
+    {
+     "name": "Helios",
+     "stations": 8,
+     "prices": {
+      "ai92": 255,
+      "ai95": 314,
+      "ai98": 341,
+      "dt": 357
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 173,
+      "ai95": 185,
+      "dt": 186
+     }
+    }
+   ]
+  },
+  "pavlodar": {
+   "name": "Павлодар",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 251,
+    "ai95": 306,
+    "ai98": 341,
+    "dt": 339,
+    "gas": 110
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 11,
+     "prices": {
+      "ai92": 254,
+      "ai95": 313,
+      "ai98": 341,
+      "dt": 348,
+      "gas": 110
+     }
+    },
+    {
+     "name": "PETROLUX",
+     "stations": 2,
+     "prices": {
+      "ai92": 247,
+      "ai95": 298,
+      "dt": 330
+     }
+    }
+   ]
+  },
+  "petropavlovsk": {
+   "name": "Петропавловск",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 213,
+    "ai95": 251,
+    "dt": 269
+   },
+   "networks": [
+    {
+     "name": "S",
+     "stations": 8,
+     "prices": {
+      "ai92": 251,
+      "ai95": 313,
+      "dt": 352
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 175,
+      "ai95": 189,
+      "ai98": 201,
+      "dt": 186
+     }
+    }
+   ]
+  },
+  "kyzylorda": {
+   "name": "Кызылорда",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 213,
+    "ai95": 248,
+    "dt": 269,
+    "gas": 95
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 5,
+     "prices": {
+      "ai92": 256,
+      "ai95": 306,
+      "dt": 353,
+      "gas": 95
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 169,
+      "ai95": 189,
+      "ai98": 199,
+      "dt": 185
+     }
+    }
+   ]
+  },
+  "uralsk": {
+   "name": "Уральск",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 205,
+    "ai95": 255,
+    "dt": 264,
+    "gas": 85
+   },
+   "networks": [
+    {
+     "name": "НЕФТЭК",
+     "stations": 8,
+     "prices": {
+      "ai92": 244,
+      "ai95": 329,
+      "dt": 347,
+      "gas": 85
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 166,
+      "ai95": 180,
+      "ai98": 199,
+      "dt": 181
+     }
+    }
+   ]
+  },
+  "kostanaj": {
+   "name": "Костанай",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 174,
+    "ai95": 187,
+    "ai98": 199,
+    "dt": 186
+   },
+   "networks": [
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 174,
+      "ai95": 187,
+      "ai98": 199,
+      "dt": 186
+     }
+    }
+   ]
+  },
+  "taldykorgan": {
+   "name": "Талдыкорган",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 255,
+    "ai95": 322,
+    "ai98": 365,
+    "dt": 359
+   },
+   "networks": [
+    {
+     "name": "Royal Petrol",
+     "stations": null,
+     "prices": {
+      "ai92": 255,
+      "ai95": 322,
+      "ai98": 365,
+      "dt": 359
+     }
+    }
+   ]
+  },
+  "taraz": {
+   "name": "Тараз",
+   "date": "2026-11-11",
+   "avg": {
+    "ai92": 255,
+    "ai95": 306,
+    "dt": 363,
+    "gas": 107
+   },
+   "networks": [
+    {
+     "name": "Royal Petrol",
+     "stations": null,
+     "prices": {
+      "ai92": 255,
+      "ai95": 306,
+      "dt": 363,
+      "gas": 107
+     }
+    }
+   ]
+  }
+ }
+}

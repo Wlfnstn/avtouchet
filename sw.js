@@ -1,6 +1,7 @@
 // АвтоУчёт — service worker: офлайн-работа и напоминания
 // При изменении файлов приложения увеличьте версию, чтобы обновить кэш.
-const VERSION = 'v4';
+const VERSION = 'v5';
+const LIBS = 'avtouchet-libs';          // pdf.js и т.п. с CDN, переживает обновления
 const CACHE = `avtouchet-${VERSION}`;
 const DATA = 'avtouchet-data';          // снимок сроков от страницы + журнал отправленных уведомлений
 const ASSETS = [
@@ -21,7 +22,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('avtouchet-') && k !== CACHE && k !== DATA).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('avtouchet-') && k !== CACHE && k !== DATA && k !== LIBS).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -33,7 +34,28 @@ self.addEventListener('message', e => {
 
 self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+
+  // Библиотеки с CDN (просмотр PDF, распознавание чеков): кэшируем, чтобы работали офлайн
+  if (url.origin !== location.origin) {
+    if (/^(cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net)$/.test(url.hostname)) {
+      e.respondWith(caches.open(LIBS).then(c => c.match(req).then(hit => hit || fetch(req).then(res => {
+        if (res.ok) c.put(req, res.clone());
+        return res;
+      }))));
+    }
+    return;
+  }
+
+  // Цены на топливо: всегда свежие из сети, при офлайне — последние сохранённые
+  if (url.pathname.endsWith('/prices.json')) {
+    e.respondWith(
+      fetch(req).then(res => { const copy = res.clone(); caches.open(DATA).then(c => c.put('prices.json', copy)); return res; })
+        .catch(() => caches.open(DATA).then(c => c.match('prices.json')))
+    );
+    return;
+  }
 
   // Страница: сначала сеть (чтобы получать обновления), при офлайне — из кэша
   if (req.mode === 'navigate') {
