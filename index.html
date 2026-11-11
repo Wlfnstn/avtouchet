@@ -15,6 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="АвтоУчёт">
 <title>АвтоУчёт</title>
+<script src="i18n.js"></script>
 <style>
 :root{
   --bg:#f4f5f7;--card:#fff;--text:#14161a;--muted:#6b7280;--line:#e5e7eb;--grid:#eceef1;
@@ -313,8 +314,9 @@ const daysUntil = s => daysBetween(todayD(), parseD(s));
 const addDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate()+Math.round(n)); return iso(d); };
 const addMonths = (s, m) => { const d = parseD(s), day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+m); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate())); return iso(d); };
 const nextApril1 = (after) => { const d = parseD(after||today()); let y = d.getFullYear(); if(iso(d) >= `${y}-04-01`) y++; return `${y}-04-01`; };
-const dstr = d => d ? parseD(d).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}) : '—';
-function humanDays(n){ n = Math.round(n); if(n<=0) return 'сегодня'; if(n<14) return `${n} ${plural(n,'день','дня','дней')}`; if(n<60) return `${Math.round(n/7)} нед.`; return `${Math.round(n/30.4)} мес.`; }
+const KK_MON = ['қаң.','ақп.','нау.','сәу.','мам.','мау.','шіл.','там.','қыр.','қаз.','қар.','жел.'];
+const dstr = d => { if(!d) return '—'; const x = parseD(d); return LANG==='kk' ? `${x.getDate()} ${KK_MON[x.getMonth()]} ${x.getFullYear()} ж.` : x.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}); };
+function humanDays(n){ n = Math.round(n); if(LANG==='kk') return n<=0 ? 'бүгін' : n<14 ? `${n} күн` : n<60 ? `${Math.round(n/7)} апта` : `${Math.round(n/30.4)} ай`; if(n<=0) return 'сегодня'; if(n<14) return `${n} ${plural(n,'день','дня','дней')}`; if(n<60) return `${Math.round(n/7)} нед.`; return `${Math.round(n/30.4)} мес.`; }
 
 /* ===================== Состояние ===================== */
 const uid = () => Math.random().toString(36).slice(2,10);
@@ -496,6 +498,8 @@ function carDialog(isNew){
       <button type="button" class="ghost sm" id="expBtn">Экспорт</button>
       <button type="button" class="ghost sm" id="impBtn">Импорт</button>
       <button type="button" class="ghost sm" id="shareBtn">📤 Поделиться приложением</button>
+      <label class="sm" style="display:inline-flex;align-items:center;gap:6px">🌐<select id="langSel" aria-label="Язык / Тіл"><option value="ru" ${LANG==='ru'?'selected':''}>Русский</option><option value="kk" ${LANG==='kk'?'selected':''}>Қазақша</option></select></label>
+      ${FEEDBACK_TG?'<button type="button" class="ghost sm" id="fbBtn">💬 Написать разработчику</button>':''}
       ${S.cars.length>1?'<button type="button" class="danger sm" id="delCarBtn">Удалить авто</button>':''}
     </div>`}
   `, [
@@ -522,6 +526,8 @@ function carDialog(isNew){
     $('expBtn').onclick = exportData;
     $('impBtn').onclick = importData;
     $('shareBtn').onclick = shareApp;
+    $('langSel').onchange = e=>{ save(); setLang(e.target.value); };
+    if($('fbBtn')) $('fbBtn').onclick = feedback;
     const del = $('delCarBtn');
     if(del) del.onclick = ()=>{
       if(!confirm(`Удалить «${car().name}» со всей историей?`)) return;
@@ -560,6 +566,14 @@ async function exportData(){
   toast(S.files.length ? `Копия сохранена вместе с файлами (${S.files.length})` : 'Резервная копия сохранена', null, null, 3000);
 }
 const APP_URL = 'https://wlfnstn.github.io/avtouchet/';
+// Ник разработчика в Telegram для отзывов (без @). Пусто — кнопка «Написать разработчику» скрыта.
+const FEEDBACK_TG = '';
+function feedback(){
+  const ua = navigator.userAgent, dev = /android/i.test(ua) ? 'Android' : isIOS ? 'iPhone' : 'компьютер';
+  const text = `Отзыв об АвтоУчёте (${dev}${isStandalone?', установлено':''}):\n`;
+  const url = `https://t.me/${FEEDBACK_TG}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'noopener');
+}
 async function shareApp(){
   const data = {title:'АвтоУчёт', text:'Учёт ТО, документов, расходов на авто и цены на бензин в Казахстане', url:APP_URL};
   try{ if(navigator.share){ await navigator.share(data); return; } }catch(e){ if(e && e.name==='AbortError') return; }
@@ -1102,8 +1116,8 @@ function monthKeys(n){
   for(let i=n-1;i>=0;i--){ const x = new Date(d.getFullYear(), d.getMonth()-i, 1); keys.push(`${x.getFullYear()}-${pad(x.getMonth()+1)}`); }
   return keys;
 }
-const MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-const MONTHS_FULL = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS = LANG==='kk' ? ['қаң','ақп','нау','сәу','мам','мау','шіл','там','қыр','қаз','қар','жел'] : ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const MONTHS_FULL = LANG==='kk' ? ['Қаңтар','Ақпан','Наурыз','Сәуір','Мамыр','Маусым','Шілде','Тамыз','Қыркүйек','Қазан','Қараша','Желтоқсан'] : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 function niceMax(v){ if(v<=0) return 10000; const p = Math.pow(10, Math.floor(Math.log10(v))); for(const m of [1,2,2.5,5,10]) if(m*p>=v) return m*p; return 10*p; }
 
 /* ===================== Экраны ===================== */
