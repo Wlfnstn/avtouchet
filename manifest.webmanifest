@@ -1,0 +1,23 @@
+{
+  "name": "АвтоУчёт — техобслуживание и топливо",
+  "short_name": "АвтоУчёт",
+  "description": "Учёт интервалов ТО, замены масла и жидкостей, расходников и цен на топливо в Казахстане",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1013",
+  "theme_color": "#0f766e",
+  "categories": ["utilities", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Добавить заправку", "url": "./?action=fill", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Записать ТО", "url": "./?action=record", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

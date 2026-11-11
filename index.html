@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1013" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Учёт ТО, замены масла и жидкостей, расходников и цен на топливо в Казахстане">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="АвтоУчёт">
+<title>АвтоУчёт</title>
+<style>
+:root{
+  --bg:#f4f5f7;--card:#fff;--text:#14161a;--muted:#6b7280;--line:#e5e7eb;
+  --accent:#0f766e;--accent-soft:#ccfbf1;
+  --ok:#15803d;--ok-soft:#dcfce7;--warn:#b45309;--warn-soft:#fef3c7;--bad:#b91c1c;--bad-soft:#fee2e2;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e1013;--card:#171a1f;--text:#e8eaed;--muted:#9aa1ab;--line:#262a31;
+    --accent:#2dd4bf;--accent-soft:#123b37;
+    --ok:#4ade80;--ok-soft:#14301f;--warn:#fbbf24;--warn-soft:#3a2c0e;--bad:#f87171;--bad-soft:#3b1717;
+    --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:84px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line)}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:728px;margin:0 auto;z-index:20;background:var(--text);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast .sp{font-size:14px}
+.toast button{flex:none}
+[hidden]{display:none!important}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;align-items:center;gap:10px}
+.logo{font-weight:700;font-size:18px}
+.logo span{color:var(--accent)}
+select,input,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.top select{width:auto;flex:1;min-width:0}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 14px;background:var(--accent);color:#fff;font-weight:600}
+@media (prefers-color-scheme:dark){button{color:#06201d}}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+button.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+button.sm{padding:6px 10px;font-size:13px}
+main{padding:16px}
+h2{font-size:17px;margin:22px 0 10px}
+h2:first-child{margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:10px}
+.stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat .k{color:var(--muted);font-size:13px}
+.stat .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.row{display:flex;gap:10px;align-items:center}
+.row.wrapr{flex-wrap:wrap}
+.sp{flex:1}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.item{display:flex;flex-direction:column;gap:8px}
+.item-head{display:flex;align-items:flex-start;gap:10px}
+.item-title{font-weight:600}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.b-none{background:var(--line);color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px}
+.list{display:grid;gap:10px}
+.form{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.form .full{grid-column:1/-1}
+label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));z-index:5}
+nav .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+nav button{background:none;color:var(--muted);font-weight:500;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px}
+nav button svg{width:22px;height:22px}
+nav button.on{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{color:var(--muted);font-weight:500;font-size:12px}
+td.num,th.num{text-align:right}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.price{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.price .n{font-size:13px;color:var(--muted)}
+.price input{font-size:20px;font-weight:700;padding:4px 6px;margin-top:4px}
+dialog{border:0;border-radius:16px;padding:0;background:var(--card);color:var(--text);width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 40px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog .dh{padding:16px 16px 0;font-weight:700;font-size:17px}
+dialog .db{padding:16px}
+dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end}
+.empty{text-align:center;padding:28px 16px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:500;font-size:13px;padding:6px 10px;border-radius:999px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+@media (max-width:420px){.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div class="logo">Авто<span>Учёт</span></div>
+    <select id="carSel" aria-label="Автомобиль"></select>
+    <button class="sm" id="installBtn" hidden>Установить</button>
+    <button class="ghost sm" id="carEditBtn" title="Автомобиль">⚙︎</button>
+  </div>
+</header>
+
+<main class="wrap" id="view"></main>
+
+<nav>
+  <div class="wrap">
+    <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Обзор</button>
+    <button data-tab="service"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>ТО</button>
+    <button data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>История</button>
+    <button data-tab="fuel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M14 9h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8l-3-3M7 8h4"/></svg>Топливо</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" hidden><div class="sp" id="toastText"></div><button class="sm" id="toastBtn"></button><button class="sm ghost" id="toastClose" aria-label="Закрыть" style="color:inherit">✕</button></div>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"><div class="dh" id="dlgTitle"></div><div class="db" id="dlgBody"></div><div class="df" id="dlgFoot"></div></form></dialog>
+
+<script>
+/* ===================== Данные ===================== */
+const KEY = 'avtouchet.v1';
+const FUELS = [
+  {id:'ai92', name:'АИ-92'},
+  {id:'ai95', name:'АИ-95'},
+  {id:'ai98', name:'АИ-98'},
+  {id:'dt',   name:'Дизель (ДТ)'},
+  {id:'gas',  name:'Газ (пропан)'},
+];
+// Ориентировочные цены по Казахстану, ₸/л — пользователь обновляет вручную
+const DEFAULT_PRICES = {ai92:205, ai95:255, ai98:320, dt:300, gas:110};
+
+const TEMPLATE = [
+  {name:'Моторное масло + масляный фильтр', cat:'Масла', km:10000, mo:12},
+  {name:'Воздушный фильтр',                 cat:'Фильтры', km:15000, mo:12},
+  {name:'Салонный фильтр',                  cat:'Фильтры', km:15000, mo:12},
+  {name:'Топливный фильтр',                 cat:'Фильтры', km:30000, mo:24},
+  {name:'Свечи зажигания',                  cat:'Расходники', km:30000, mo:36},
+  {name:'Тормозная жидкость',               cat:'Жидкости', km:40000, mo:24},
+  {name:'Антифриз (охлаждающая жидкость)',  cat:'Жидкости', km:60000, mo:48},
+  {name:'Масло в коробке передач',          cat:'Масла', km:60000, mo:48},
+  {name:'Жидкость ГУР',                     cat:'Жидкости', km:60000, mo:48},
+  {name:'Тормозные колодки (перед)',        cat:'Расходники', km:30000, mo:0},
+  {name:'Ремень ГРМ / навесного',           cat:'Расходники', km:60000, mo:60},
+  {name:'Щётки стеклоочистителя',           cat:'Расходники', km:0, mo:12},
+  {name:'Аккумулятор (проверка/замена)',    cat:'Расходники', km:0, mo:48},
+];
+const CATS = ['Масла','Жидкости','Фильтры','Расходники','Другое'];
+
+const uid = () => Math.random().toString(36).slice(2,10);
+const today = () => new Date().toISOString().slice(0,10);
+
+function freshState(){
+  const carId = uid();
+  return {
+    cars:[{id:carId, name:'Мой автомобиль', mileage:0, fuel:'ai92', consumption:8}],
+    activeCarId: carId,
+    items: TEMPLATE.map(t=>({id:uid(), carId, name:t.name, cat:t.cat, intervalKm:t.km, intervalMo:t.mo, lastKm:null, lastDate:null})),
+    records: [],
+    fillups: [],
+    prices: {...DEFAULT_PRICES},
+    pricesUpdated: null,
+  };
+}
+let S;
+function load(){
+  try{ const raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : freshState(); }
+  catch(e){ S = freshState(); }
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ===================== Утилиты ===================== */
+const fmt = n => (n==null||isNaN(n)) ? '—' : Math.round(n).toLocaleString('ru-RU');
+const fmt1 = n => (n==null||isNaN(n)) ? '—' : (Math.round(n*10)/10).toLocaleString('ru-RU');
+const tg = n => fmt(n) + ' ₸';
+const dstr = d => d ? new Date(d+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}) : '—';
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const car = () => S.cars.find(c=>c.id===S.activeCarId) || S.cars[0];
+const carItems = () => S.items.filter(i=>i.carId===car().id);
+const carRecords = () => S.records.filter(r=>r.carId===car().id).sort((a,b)=>b.date.localeCompare(a.date)||b.km-a.km);
+const carFillups = () => S.fillups.filter(f=>f.carId===car().id).sort((a,b)=>a.date.localeCompare(b.date)||a.km-b.km);
+function addMonths(d, m){ const x=new Date(d+'T00:00:00'); x.setMonth(x.getMonth()+m); return x; }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+
+function status(it){
+  const c = car();
+  if(it.lastKm==null && !it.lastDate) return {cls:'none', label:'Нет данных', pct:0, text:'Отметьте последнюю замену'};
+  let pct = 0, parts = [];
+  if(it.intervalKm && it.lastKm!=null){
+    const used = c.mileage - it.lastKm, left = it.intervalKm - used;
+    pct = Math.max(pct, used/it.intervalKm);
+    parts.push(left>=0 ? `через ${fmt(left)} км` : `просрочено на ${fmt(-left)} км`);
+  }
+  if(it.intervalMo && it.lastDate){
+    const due = addMonths(it.lastDate, it.intervalMo), now = new Date();
+    const total = daysBetween(new Date(it.lastDate+'T00:00:00'), due);
+    const left = daysBetween(now, due);
+    pct = Math.max(pct, (total-left)/total);
+    parts.push(left>=0 ? `до ${due.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}` : `просрочено на ${fmt(-left)} дн.`);
+  }
+  const cls = pct>=1 ? 'bad' : pct>=0.85 ? 'warn' : 'ok';
+  const label = cls==='bad' ? 'Пора менять' : cls==='warn' ? 'Скоро' : 'В норме';
+  return {cls, label, pct, text: parts.join(' · ') || 'Интервал не задан'};
+}
+const barColor = {ok:'var(--ok)', warn:'var(--warn)', bad:'var(--bad)', none:'var(--line)'};
+
+/* ===================== Диалоги ===================== */
+const dlg = document.getElementById('dlg');
+function openDialog(title, body, buttons){
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgBody').innerHTML = body;
+  const foot = document.getElementById('dlgFoot'); foot.innerHTML='';
+  buttons.forEach(b=>{
+    const el = document.createElement('button');
+    el.type = b.submit ? 'submit' : 'button';
+    el.textContent = b.text; if(b.cls) el.className = b.cls;
+    el.onclick = (e)=>{
+      if(b.submit){ const f=document.getElementById('dlgForm'); if(!f.reportValidity()){e.preventDefault();return;} }
+      const r = b.onClick ? b.onClick() : null;
+      if(r===false){ e.preventDefault(); return; }
+      dlg.close();
+    };
+    foot.appendChild(el);
+  });
+  dlg.showModal();
+}
+const val = id => document.getElementById(id).value;
+const num = id => { const v = document.getElementById(id).value; return v==='' ? null : Number(v); };
+
+/* ===================== Автомобиль ===================== */
+function carDialog(isNew){
+  const c = isNew ? {name:'', mileage:'', fuel:'ai92', consumption:8} : car();
+  openDialog(isNew ? 'Новый автомобиль' : 'Автомобиль', `
+    <div class="form">
+      <label class="full">Название<input id="f_name" required value="${esc(c.name)}" placeholder="Toyota Camry 2018"></label>
+      <label>Текущий пробег, км<input id="f_mil" type="number" min="0" inputmode="numeric" required value="${c.mileage}"></label>
+      <label>Расход, л/100 км<input id="f_cons" type="number" step="0.1" min="0" value="${c.consumption}"></label>
+      <label class="full">Топливо<select id="f_fuel">${FUELS.map(f=>`<option value="${f.id}" ${f.id===c.fuel?'selected':''}>${f.name}</option>`).join('')}</select></label>
+    </div>
+    ${isNew?'':`<div class="row wrapr" style="margin-top:14px">
+      <button type="button" class="ghost sm" id="newCarBtn">+ Добавить ещё авто</button>
+      <button type="button" class="ghost sm" id="expBtn">Экспорт</button>
+      <button type="button" class="ghost sm" id="impBtn">Импорт</button>
+      ${S.cars.length>1?'<button type="button" class="danger sm" id="delCarBtn">Удалить авто</button>':''}
+    </div>`}
+  `, [
+    {text:'Отмена', cls:'ghost'},
+    {text:'Сохранить', submit:true, onClick:()=>{
+      const data = {name:val('f_name').trim(), mileage:num('f_mil')||0, consumption:num('f_cons')||0, fuel:val('f_fuel')};
+      if(isNew){
+        const id = uid();
+        S.cars.push({id, ...data});
+        TEMPLATE.forEach(t=>S.items.push({id:uid(), carId:id, name:t.name, cat:t.cat, intervalKm:t.km, intervalMo:t.mo, lastKm:null, lastDate:null}));
+        S.activeCarId = id;
+      } else Object.assign(car(), data);
+      save(); render();
+    }},
+  ]);
+  if(!isNew){
+    document.getElementById('newCarBtn').onclick = ()=>{ dlg.close(); carDialog(true); };
+    document.getElementById('expBtn').onclick = exportData;
+    document.getElementById('impBtn').onclick = importData;
+    const del = document.getElementById('delCarBtn');
+    if(del) del.onclick = ()=>{
+      if(!confirm(`Удалить «${car().name}» со всей историей?`)) return;
+      const id = car().id;
+      S.cars = S.cars.filter(c=>c.id!==id);
+      S.items = S.items.filter(i=>i.carId!==id);
+      S.records = S.records.filter(r=>r.carId!==id);
+      S.fillups = S.fillups.filter(f=>f.carId!==id);
+      S.activeCarId = S.cars[0].id; save(); dlg.close(); render();
+    };
+  }
+}
+function mileageDialog(){
+  openDialog('Обновить пробег', `<label>Пробег сейчас, км<input id="f_mil" type="number" min="0" inputmode="numeric" required value="${car().mileage}"></label>`,
+    [{text:'Отмена',cls:'ghost'},{text:'Сохранить',submit:true,onClick:()=>{ car().mileage = num('f_mil')||0; save(); render(); }}]);
+  setTimeout(()=>{const i=document.getElementById('f_mil'); i.select();},50);
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `avtouchet-${today()}.json`; a.click();
+}
+function importData(){
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  inp.onchange = async ()=>{
+    try{ const d = JSON.parse(await inp.files[0].text()); if(!d.cars||!d.items) throw 0; S=d; save(); dlg.close(); render(); }
+    catch(e){ alert('Не удалось прочитать файл'); }
+  };
+  inp.click();
+}
+
+/* ===================== ТО: позиции и записи ===================== */
+function itemDialog(it){
+  const isNew = !it; it = it || {name:'', cat:'Расходники', intervalKm:'', intervalMo:'', lastKm:'', lastDate:''};
+  openDialog(isNew?'Новая позиция ТО':'Позиция ТО', `
+    <div class="form">
+      <label class="full">Название<input id="f_name" required value="${esc(it.name)}" placeholder="Например: Масло в раздатке"></label>
+      <label class="full">Категория<select id="f_cat">${CATS.map(c=>`<option ${c===it.cat?'selected':''}>${c}</option>`).join('')}</select></label>
+      <label>Интервал, км<input id="f_ikm" type="number" min="0" value="${it.intervalKm||''}" placeholder="0 = не учитывать"></label>
+      <label>Интервал, мес.<input id="f_imo" type="number" min="0" value="${it.intervalMo||''}" placeholder="0 = не учитывать"></label>
+      <label>Последняя замена, км<input id="f_lkm" type="number" min="0" value="${it.lastKm??''}"></label>
+      <label>Дата последней замены<input id="f_ld" type="date" value="${it.lastDate||''}"></label>
+    </div>`,
+  [
+    ...(isNew?[]:[{text:'Удалить',cls:'danger',onClick:()=>{ if(!confirm('Удалить позицию и её историю?')) return false; S.items=S.items.filter(x=>x.id!==it.id); S.records=S.records.filter(r=>r.itemId!==it.id); save(); render(); }}]),
+    {text:'Отмена',cls:'ghost'},
+    {text:'Сохранить',submit:true,onClick:()=>{
+      const d = {name:val('f_name').trim(), cat:val('f_cat'), intervalKm:num('f_ikm')||0, intervalMo:num('f_imo')||0, lastKm:num('f_lkm'), lastDate:val('f_ld')||null};
+      if(isNew) S.items.push({id:uid(), carId:car().id, ...d}); else Object.assign(it,d);
+      save(); render();
+    }},
+  ]);
+}
+function recordDialog(preItemId){
+  const items = carItems();
+  openDialog('Записать обслуживание', `
+    <div class="form">
+      <label class="full">Что сделано<select id="f_item">${items.map(i=>`<option value="${i.id}" ${i.id===preItemId?'selected':''}>${esc(i.name)}</option>`).join('')}<option value="">Другое (разовая работа)</option></select></label>
+      <label class="full" id="otherWrap" style="display:none">Описание<input id="f_other" placeholder="Например: развал-схождение"></label>
+      <label>Дата<input id="f_date" type="date" required value="${today()}"></label>
+      <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" required value="${car().mileage||''}"></label>
+      <label>Стоимость, ₸<input id="f_cost" type="number" min="0" inputmode="numeric" placeholder="запчасти + работа"></label>
+      <label>Где / заметка<input id="f_note" placeholder="СТО, бренд масла…"></label>
+    </div>`,
+  [
+    {text:'Отмена',cls:'ghost'},
+    {text:'Сохранить',submit:true,onClick:()=>{
+      const itemId = val('f_item') || null, km = num('f_km'), date = val('f_date');
+      S.records.push({id:uid(), carId:car().id, itemId, title: itemId ? null : (val('f_other').trim()||'Работа'), date, km, cost:num('f_cost')||0, note:val('f_note').trim()});
+      if(itemId){
+        const it = S.items.find(i=>i.id===itemId);
+        if(it.lastDate==null || date >= it.lastDate){ it.lastDate = date; it.lastKm = km; }
+      }
+      if(km > car().mileage) car().mileage = km;
+      save(); render();
+    }},
+  ]);
+  const sel = document.getElementById('f_item');
+  const sync = ()=> document.getElementById('otherWrap').style.display = sel.value ? 'none' : '';
+  sel.onchange = sync; sync();
+}
+function recalcItem(itemId){
+  const it = S.items.find(i=>i.id===itemId); if(!it) return;
+  const recs = S.records.filter(r=>r.itemId===itemId).sort((a,b)=>b.date.localeCompare(a.date));
+  if(recs[0]){ it.lastDate = recs[0].date; it.lastKm = recs[0].km; }
+}
+
+/* ===================== Топливо ===================== */
+function fillDialog(){
+  const c = car();
+  openDialog('Заправка', `
+    <div class="form">
+      <label>Дата<input id="f_date" type="date" required value="${today()}"></label>
+      <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" required value="${c.mileage||''}"></label>
+      <label>Топливо<select id="f_fuel">${FUELS.map(f=>`<option value="${f.id}" ${f.id===c.fuel?'selected':''}>${f.name}</option>`).join('')}</select></label>
+      <label>Цена, ₸/л<input id="f_price" type="number" step="0.01" min="0" required value="${S.prices[c.fuel]}"></label>
+      <label>Литров<input id="f_l" type="number" step="0.01" min="0" required></label>
+      <label>Сумма, ₸<input id="f_sum" type="number" min="0"></label>
+      <label class="full" style="flex-direction:row;display:flex;gap:8px;align-items:center;color:var(--text)"><input id="f_full" type="checkbox" checked style="width:auto"> Полный бак (для расчёта расхода)</label>
+    </div>`,
+  [
+    {text:'Отмена',cls:'ghost'},
+    {text:'Сохранить',submit:true,onClick:()=>{
+      const km = num('f_km');
+      S.fillups.push({id:uid(), carId:c.id, date:val('f_date'), km, fuel:val('f_fuel'), price:num('f_price'), liters:num('f_l'), full:document.getElementById('f_full').checked});
+      if(km > c.mileage) c.mileage = km;
+      save(); render();
+    }},
+  ]);
+  const p=document.getElementById('f_price'), l=document.getElementById('f_l'), s=document.getElementById('f_sum'), fu=document.getElementById('f_fuel');
+  l.oninput = ()=>{ if(p.value&&l.value) s.value = Math.round(p.value*l.value); };
+  s.oninput = ()=>{ if(p.value&&s.value) l.value = (s.value/p.value).toFixed(2); };
+  p.oninput = l.oninput;
+  fu.onchange = ()=>{ p.value = S.prices[fu.value]; l.oninput(); };
+}
+function fuelStats(){
+  const f = carFillups();
+  let segs = [], lastFullIdx = -1;
+  f.forEach((x,i)=>{
+    if(!x.full) return;
+    if(lastFullIdx>=0){
+      const dist = x.km - f[lastFullIdx].km;
+      const liters = f.slice(lastFullIdx+1, i+1).reduce((a,b)=>a+b.liters,0);
+      if(dist>0) segs.push({id:x.id, per100: liters/dist*100});
+    }
+    lastFullIdx = i;
+  });
+  const avg = segs.length ? segs.reduce((a,b)=>a+b.per100,0)/segs.length : null;
+  return {avg, segs: Object.fromEntries(segs.map(s=>[s.id,s.per100]))};
+}
+
+/* ===================== Экраны ===================== */
+let tab = 'home', histFilter = 'all';
+function render(){
+  const sel = document.getElementById('carSel');
+  sel.innerHTML = S.cars.map(c=>`<option value="${c.id}" ${c.id===car().id?'selected':''}>${esc(c.name)}</option>`).join('');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+  const v = document.getElementById('view');
+  v.innerHTML = ({home:viewHome, service:viewService, history:viewHistory, fuel:viewFuel})[tab]();
+  v.querySelectorAll('[data-act]').forEach(el=>el.onclick = ()=>ACT[el.dataset.act](el.dataset.id));
+  bindFuelInputs();
+}
+const ACT = {
+  mileage: mileageDialog,
+  record: id=>recordDialog(id),
+  item: id=>itemDialog(S.items.find(i=>i.id===id)),
+  newItem: ()=>itemDialog(null),
+  fill: fillDialog,
+  go: t=>{ tab=t; render(); scrollTo(0,0); },
+  filt: f=>{ histFilter=f; render(); },
+  delRec: id=>{ if(!confirm('Удалить запись?')) return; const r=S.records.find(x=>x.id===id); S.records=S.records.filter(x=>x.id!==id); if(r.itemId) recalcItem(r.itemId); save(); render(); },
+  delFill: id=>{ if(!confirm('Удалить заправку?')) return; S.fillups=S.fillups.filter(x=>x.id!==id); save(); render(); },
+  resetPrices: ()=>{ S.prices={...DEFAULT_PRICES}; S.pricesUpdated=null; save(); render(); },
+};
+
+function itemCard(it){
+  const st = status(it);
+  return `<div class="card item">
+    <div class="item-head">
+      <div class="sp"><div class="item-title">${esc(it.name)}</div>
+        <div class="small muted">${[it.intervalKm?`каждые ${fmt(it.intervalKm)} км`:'', it.intervalMo?`${it.intervalMo} мес.`:''].filter(Boolean).join(' или ')||'интервал не задан'}</div></div>
+      <span class="badge b-${st.cls}">${st.label}</span>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100,st.pct*100)}%;background:${barColor[st.cls]}"></i></div>
+    <div class="row small"><span class="sp muted">${st.text}${it.lastDate||it.lastKm!=null?` · посл.: ${it.lastKm!=null?fmt(it.lastKm)+' км':''}${it.lastDate?' '+dstr(it.lastDate):''}`:''}</span>
+      <button class="ghost sm" data-act="item" data-id="${it.id}">Изм.</button>
+      <button class="sm" data-act="record" data-id="${it.id}">Заменил</button></div>
+  </div>`;
+}
+
+function viewHome(){
+  const c = car(), items = carItems().map(i=>({i, s:status(i)}));
+  const due = items.filter(x=>x.s.cls==='bad'||x.s.cls==='warn').sort((a,b)=>b.s.pct-a.s.pct);
+  const unknown = items.filter(x=>x.s.cls==='none').length;
+  const y = String(new Date().getFullYear());
+  const svc = S.records.filter(r=>r.carId===c.id && r.date.startsWith(y)).reduce((a,b)=>a+b.cost,0);
+  const fuel = S.fillups.filter(f=>f.carId===c.id && f.date.startsWith(y)).reduce((a,b)=>a+b.liters*b.price,0);
+  const {avg} = fuelStats();
+  return `
+  <div class="grid stats">
+    <div class="card stat"><div class="k">Пробег</div><div class="v">${fmt(c.mileage)} км</div>
+      <button class="ghost sm" style="margin-top:8px" data-act="mileage">Обновить</button></div>
+    <div class="card stat"><div class="k">Требуют внимания</div><div class="v" style="color:${due.length?'var(--warn)':'var(--ok)'}">${due.length}</div>
+      <div class="small muted" style="margin-top:8px">${unknown?`${unknown} без данных`:'все позиции отслеживаются'}</div></div>
+    <div class="card stat"><div class="k">Расходы в ${y}</div><div class="v">${tg(svc+fuel)}</div>
+      <div class="small muted" style="margin-top:8px">ТО ${tg(svc)} · топливо ${tg(fuel)}</div></div>
+    <div class="card stat"><div class="k">Средний расход</div><div class="v">${avg?fmt1(avg):fmt1(c.consumption)} л</div>
+      <div class="small muted" style="margin-top:8px">${avg?'по заправкам':'указан вручную'} · на 100 км</div></div>
+  </div>
+  <h2>Ближайшее обслуживание</h2>
+  ${due.length ? `<div class="list">${due.map(x=>itemCard(x.i)).join('')}</div>`
+    : `<div class="card empty">${unknown===items.length ? 'Начните с того, что отметите, когда последний раз меняли масло, фильтры и жидкости.<br><br><button data-act="go" data-id="service">Заполнить ТО</button>' : 'Всё в порядке — ничего не требует замены в ближайшее время 👍'}</div>`}
+  <h2>Цены на топливо</h2>
+  <div class="card">
+    <div class="row wrapr">${FUELS.map(f=>`<div style="min-width:90px" class="sp"><div class="small muted">${f.name}</div><div style="font-weight:700;font-size:18px">${fmt(S.prices[f.id])} ₸</div></div>`).join('')}</div>
+    <div class="note">${S.pricesUpdated?`Обновлено ${dstr(S.pricesUpdated)}`:'Ориентировочные цены по Казахстану — уточните на своей АЗС'} · <a href="#" data-act="go" data-id="fuel" style="color:var(--accent)">изменить</a></div>
+  </div>`;
+}
+
+function viewService(){
+  const items = carItems();
+  const groups = CATS.map(cat=>({cat, list: items.filter(i=>i.cat===cat).sort((a,b)=>status(b).pct-status(a).pct)})).filter(g=>g.list.length);
+  return `
+  <div class="row"><h2 class="sp" style="margin:4px 0">Регламент ТО</h2>
+    <button class="ghost sm" data-act="newItem">+ Позиция</button>
+    <button class="sm" data-act="record">+ Запись</button></div>
+  <p class="small muted">Пробег сейчас: <b>${fmt(car().mileage)} км</b>. Интервалы — типовые, поправьте под свою машину и сервисную книжку.</p>
+  ${groups.map(g=>`<h2>${g.cat}</h2><div class="list">${g.list.map(itemCard).join('')}</div>`).join('')}`;
+}
+
+function viewHistory(){
+  const recs = carRecords();
+  const items = Object.fromEntries(S.items.map(i=>[i.id,i]));
+  const cats = ['all', ...CATS];
+  const shown = recs.filter(r=> histFilter==='all' || (r.itemId ? items[r.itemId]?.cat : 'Другое')===histFilter);
+  const total = shown.reduce((a,b)=>a+b.cost,0);
+  return `
+  <div class="row"><h2 class="sp" style="margin:4px 0">История обслуживания</h2><button class="sm" data-act="record">+ Запись</button></div>
+  <div class="chips" style="margin:10px 0">${cats.map(c=>`<button class="chip ${histFilter===c?'on':''}" data-act="filt" data-id="${c}">${c==='all'?'Все':c}</button>`).join('')}</div>
+  ${shown.length ? `<div class="card" style="padding:4px 10px;overflow-x:auto"><table>
+    <thead><tr><th>Дата</th><th>Работа</th><th class="num">Пробег</th><th class="num">₸</th><th></th></tr></thead>
+    <tbody>${shown.map(r=>`<tr><td>${dstr(r.date)}</td><td>${esc(r.itemId?items[r.itemId]?.name:r.title)}${r.note?`<div class="small muted">${esc(r.note)}</div>`:''}</td><td class="num">${fmt(r.km)}</td><td class="num">${r.cost?fmt(r.cost):'—'}</td><td><button class="danger sm" data-act="delRec" data-id="${r.id}" aria-label="Удалить">✕</button></td></tr>`).join('')}</tbody>
+  </table></div><p class="small muted">Итого: <b>${tg(total)}</b> за ${shown.length} ${plural(shown.length,'запись','записи','записей')}</p>`
+  : `<div class="card empty">Записей пока нет. Нажмите «Заменил» у позиции ТО или «+ Запись».</div>`}`;
+}
+function plural(n,a,b,c){ n=Math.abs(n)%100; const m=n%10; return n>10&&n<20?c:m>1&&m<5?b:m===1?a:c; }
+
+function viewFuel(){
+  const c = car(), f = carFillups(), {avg, segs} = fuelStats();
+  const cons = avg || c.consumption;
+  return `
+  <h2>Цены на топливо в Казахстане, ₸/л</h2>
+  <div class="price-grid">${FUELS.map(x=>`<div class="price"><div class="n">${x.name}</div><input type="number" step="0.01" min="0" data-price="${x.id}" value="${S.prices[x.id]}"></div>`).join('')}</div>
+  <div class="note">${S.pricesUpdated?`Вы обновили цены ${dstr(S.pricesUpdated)}.`:'Указаны ориентировочные цены — цены на АЗС отличаются по регионам и сетям (Helios, Sinooil, Qazaq Oil, Gazprom и др.). Впишите актуальные.'} <a href="#" data-act="resetPrices" style="color:var(--accent)">Сбросить</a></div>
+
+  <h2>Калькулятор поездки</h2>
+  <div class="card"><div class="form">
+    <label>Расстояние, км<input id="c_dist" type="number" min="0" value="100"></label>
+    <label>Расход, л/100 км<input id="c_cons" type="number" step="0.1" min="0" value="${fmt1(cons).replace(',','.').replace(/\s/g,'')}"></label>
+    <label class="full">Топливо<select id="c_fuel">${FUELS.map(x=>`<option value="${x.id}" ${x.id===c.fuel?'selected':''}>${x.name} — ${fmt(S.prices[x.id])} ₸</option>`).join('')}</select></label>
+  </div>
+  <div class="row" style="margin-top:12px"><div class="sp"><div class="small muted">Стоимость поездки</div><div id="c_res" style="font-size:24px;font-weight:700"></div></div>
+  <div style="text-align:right"><div class="small muted">Литров</div><div id="c_l" style="font-size:18px;font-weight:600"></div></div></div></div>
+
+  <div class="row"><h2 class="sp">Журнал заправок</h2><button class="sm" data-act="fill">+ Заправка</button></div>
+  ${f.length ? `<div class="card" style="padding:4px 10px;overflow-x:auto"><table>
+    <thead><tr><th>Дата</th><th class="num">Пробег</th><th class="num">Литры</th><th class="num">₸</th><th class="num">л/100</th><th></th></tr></thead>
+    <tbody>${f.slice().reverse().map(x=>`<tr><td>${dstr(x.date)}<div class="small muted">${FUELS.find(q=>q.id===x.fuel)?.name||''}${x.full?'':' · не полный'}</div></td><td class="num">${fmt(x.km)}</td><td class="num">${fmt1(x.liters)}</td><td class="num">${fmt(x.liters*x.price)}</td><td class="num">${segs[x.id]?fmt1(segs[x.id]):'—'}</td><td><button class="danger sm" data-act="delFill" data-id="${x.id}" aria-label="Удалить">✕</button></td></tr>`).join('')}</tbody>
+  </table></div>
+  <p class="small muted">Средний расход: <b>${avg?fmt1(avg)+' л/100 км':'нужно минимум 2 полных бака'}</b> · Всего: <b>${tg(f.reduce((a,b)=>a+b.liters*b.price,0))}</b></p>`
+  : `<div class="card empty">Добавляйте заправки «до полного бака» — приложение посчитает реальный расход.</div>`}`;
+}
+
+function bindFuelInputs(){
+  document.querySelectorAll('[data-price]').forEach(inp=>inp.onchange = ()=>{
+    S.prices[inp.dataset.price] = Number(inp.value)||0; S.pricesUpdated = today(); save(); render();
+  });
+  const d = document.getElementById('c_dist'); if(!d) return;
+  const calc = ()=>{
+    const l = (Number(d.value)||0) * (Number(document.getElementById('c_cons').value)||0) / 100;
+    document.getElementById('c_l').textContent = fmt1(l) + ' л';
+    document.getElementById('c_res').textContent = tg(l * S.prices[document.getElementById('c_fuel').value]);
+  };
+  ['c_dist','c_cons','c_fuel'].forEach(id=>document.getElementById(id).oninput = calc); calc();
+}
+
+/* ===================== Старт ===================== */
+load();
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; render(); scrollTo(0,0); });
+document.getElementById('carSel').onchange = e=>{ S.activeCarId = e.target.value; save(); render(); };
+document.getElementById('carEditBtn').onclick = ()=>carDialog(false);
+document.addEventListener('click', e=>{ if(e.target.matches('a[data-act]')) e.preventDefault(); });
+render();
+let firstRun = false;
+try{ if(!localStorage.getItem(KEY+'.seen')){ localStorage.setItem(KEY+'.seen','1'); firstRun = true; setTimeout(()=>carDialog(false),300); } }catch(e){}
+
+/* ===================== PWA ===================== */
+function toast(text, btnText, onBtn){
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = text;
+  const b = document.getElementById('toastBtn');
+  b.hidden = !btnText; b.textContent = btnText||''; b.onclick = ()=>{ t.hidden = true; onBtn && onBtn(); };
+  document.getElementById('toastClose').onclick = ()=>{ t.hidden = true; };
+  t.hidden = false;
+}
+
+// Ярлыки с иконки приложения: ?action=fill / ?action=record
+(()=>{
+  const a = new URLSearchParams(location.search).get('action');
+  if(!a || firstRun) return;
+  history.replaceState(null, '', location.pathname);
+  if(a==='fill'){ tab='fuel'; render(); fillDialog(); }
+  if(a==='record'){ tab='service'; render(); recordDialog(); }
+})();
+
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    const offerUpdate = w => toast('Доступна новая версия приложения', 'Обновить', ()=>w.postMessage('skipWaiting'));
+    if(reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
+    reg.addEventListener('updatefound', ()=>{
+      const w = reg.installing;
+      w.addEventListener('statechange', ()=>{ if(w.state==='installed' && navigator.serviceWorker.controller) offerUpdate(w); });
+    });
+  }).catch(()=>{});
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(!reloading){ reloading = true; location.reload(); } });
+}
+// Просим браузер не удалять данные при нехватке места
+if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+
+// Установка на главный экран
+let deferredPrompt = null;
+const installBtn = document.getElementById('installBtn');
+addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt = e; installBtn.hidden = false; });
+installBtn.onclick = async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.hidden = true;
+};
+addEventListener('appinstalled', ()=>{ installBtn.hidden = true; });
+// iOS Safari не поддерживает кнопку установки — показываем подсказку один раз
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+try{
+  if(isIOS && !isStandalone && !firstRun && !localStorage.getItem(KEY+'.iosHint')){
+    localStorage.setItem(KEY+'.iosHint','1');
+    toast('Чтобы установить: нажмите «Поделиться» → «На экран „Домой“»');
+  }
+}catch(e){}
+</script>
+</body>
+</html>
