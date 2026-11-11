@@ -20,7 +20,7 @@
   --bg:#f4f5f7;--card:#fff;--text:#14161a;--muted:#6b7280;--line:#e5e7eb;--grid:#eceef1;
   --accent:#0f766e;--accent-soft:#ccfbf1;--on-accent:#fff;
   --ok:#15803d;--ok-soft:#dcfce7;--warn:#b45309;--warn-soft:#fef3c7;--bad:#b91c1c;--bad-soft:#fee2e2;
-  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;
   --shadow:0 1px 2px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme:dark){
@@ -28,7 +28,7 @@
     --bg:#0e1013;--card:#171a1f;--text:#e8eaed;--muted:#9aa1ab;--line:#262a31;--grid:#21252b;
     --accent:#2dd4bf;--accent-soft:#123b37;--on-accent:#06201d;
     --ok:#4ade80;--ok-soft:#14301f;--warn:#fbbf24;--warn-soft:#3a2c0e;--bad:#f87171;--bad-soft:#3b1717;
-    --s1:#3987e5;--s2:#d95926;--s3:#199e70;
+    --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;
     --shadow:none;
   }
 }
@@ -113,6 +113,8 @@ dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end;fle
 .empty{text-align:center;padding:28px 16px;color:var(--muted)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:500;font-size:13px;padding:6px 10px;border-radius:999px}
+.cats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.cats .chip{text-align:left;padding:9px 10px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
 .hint{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--text);margin-bottom:12px}
@@ -240,12 +242,39 @@ const DOC_TEMPLATE = [
   {type:'tax',     name:'Налог на транспорт',          period:12,  remind:30},
   {type:'license', name:'Водительское удостоверение',  period:120, remind:60},
 ];
-// Серии расходов (порядок фиксирован; цвета — категориальные слоты 1–3)
+// Серии расходов (порядок фиксирован; цвета — категориальные слоты 1–6 проверенной палитры)
 const SERIES = [
-  {id:'fuel',    name:'Топливо',              c:'var(--s1)'},
-  {id:'service', name:'ТО и ремонт',          c:'var(--s2)'},
-  {id:'doc',     name:'Документы и налоги',   c:'var(--s3)'},
+  {id:'fuel',      name:'Топливо',      c:'var(--s1)'},
+  {id:'service',   name:'ТО и ремонт',  c:'var(--s2)'},
+  {id:'insurance', name:'Страховка',    c:'var(--s3)'},
+  {id:'tax',       name:'Налог',        c:'var(--s4)'},
+  {id:'wash',      name:'Мойка',        c:'var(--s5)'},
+  {id:'other',     name:'Прочее',       c:'var(--s6)'},
 ];
+const zeroSeries = () => Object.fromEntries(SERIES.map(s=>[s.id,0]));
+// Категории для быстрой записи расхода
+const EXP_CATS = [
+  {id:'wash',      icon:'🧽', name:'Мойка',       hint:'Комплекс, кузов, химчистка…'},
+  {id:'insurance', icon:'🛡', name:'Страховка',   hint:'ОГПО, КАСКО'},
+  {id:'tax',       icon:'🏛', name:'Налог'},
+  {id:'repair',    icon:'🔧', name:'Ремонт / ТО'},
+  {id:'parking',   icon:'🅿️', name:'Парковка',    hint:'Где, на сколько'},
+  {id:'fine',      icon:'👮', name:'Штраф',       hint:'За что'},
+  {id:'parts',     icon:'🛞', name:'Шины, покупки', hint:'Шины, коврики, аксессуары…'},
+  {id:'other',     icon:'📦', name:'Другое',      hint:'Описание'},
+];
+// В какую серию графика попадает запись
+function seriesOf(r){
+  if(r.kind==='service' || r.cat==='repair') return 'service';
+  if(r.kind==='doc'){
+    const d = S.docs.find(x=>x.id===r.docId);
+    if(d?.type==='tax') return 'tax';
+    if(d?.type==='ogpo' || /страх|осаго|огпо|каско/i.test(d?.name||r.title||'')) return 'insurance';
+    return 'other';
+  }
+  if(['wash','insurance','tax'].includes(r.cat)) return r.cat;
+  return 'other';
+}
 
 /* ===================== Налог на транспорт (Налоговый кодекс РК, с 2026 года) ===================== */
 // МРП по годам (закон о республиканском бюджете). Для будущих лет — последний известный.
@@ -308,7 +337,10 @@ function migrate(s){
   s.items ||= []; s.records ||= []; s.fillups ||= []; s.mileageLog ||= []; s.files ||= []; s.settings ||= {notify:false};
   s.prices ||= {...DEFAULT_PRICES};
   if(!s.docs){ s.docs = []; s.cars.forEach(c=>s.docs.push(...docsFromTemplate(c.id))); }
-  s.records.forEach(r=>{ if(!r.kind) r.kind = r.itemId ? 'service' : 'other'; });
+  s.records.forEach(r=>{
+    if(!r.kind) r.kind = r.itemId ? 'service' : 'other';
+    if(r.kind==='other' && !r.cat){ const t = r.title||''; r.cat = /мойк|химчист/i.test(t) ? 'wash' : /штраф/i.test(t) ? 'fine' : /парков/i.test(t) ? 'parking' : /ремонт|развал|замен/i.test(t) ? 'repair' : 'other'; }
+  });
   s.cars.forEach(c=>{
     if(c.mileageDate===undefined) c.mileageDate = null;
     if(c.mileage>0 && !s.mileageLog.some(m=>m.carId===c.id)) s.mileageLog.push({carId:c.id, date:today(), km:c.mileage});
@@ -560,7 +592,7 @@ function recordDialog(preItemId){
   const items = carItems();
   openDialog('Записать обслуживание / расход', `
     <div class="form">
-      <label class="full">Что сделано<select id="f_item">${items.map(i=>`<option value="${i.id}" ${i.id===preItemId?'selected':''}>${esc(i.name)}</option>`).join('')}<option value="" ${preItemId===''?'selected':''}>Другое: ремонт, мойка, штраф, парковка…</option></select></label>
+      <label class="full">Что сделано<select id="f_item">${items.map(i=>`<option value="${i.id}" ${i.id===preItemId?'selected':''}>${esc(i.name)}</option>`).join('')}<option value="" ${preItemId===''?'selected':''}>Другой ремонт или работа…</option></select></label>
       <label class="full" id="otherWrap" style="display:none">Описание<input id="f_other" placeholder="Например: развал-схождение"></label>
       <label>Дата<input id="f_date" type="date" required value="${today()}"></label>
       <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" value="${estMileage()||''}"></label>
@@ -572,7 +604,7 @@ function recordDialog(preItemId){
     {text:'Сохранить',submit:true,onClick:()=>{
       const itemId = val('f_item') || null, km = num('f_km'), date = val('f_date');
       if(itemId && km==null){ alert('Укажите пробег — он нужен для расчёта следующей замены'); return false; }
-      S.records.push({id:uid(), carId:car().id, kind: itemId?'service':'other', itemId, title: itemId ? null : (val('f_other').trim()||'Расход'), date, km, cost:num('f_cost')||0, note:val('f_note').trim()});
+      S.records.push({id:uid(), carId:car().id, kind: itemId?'service':'other', cat: itemId?undefined:'repair', itemId, title: itemId ? null : (val('f_other').trim()||'Ремонт'), date, km, cost:num('f_cost')||0, note:val('f_note').trim()});
       if(itemId){
         const it = S.items.find(i=>i.id===itemId);
         if(it.lastDate==null || date >= it.lastDate){ it.lastDate = date; it.lastKm = km; }
@@ -584,6 +616,51 @@ function recordDialog(preItemId){
   const sel = $('f_item');
   const sync = ()=> $('otherWrap').style.display = sel.value ? 'none' : '';
   sel.onchange = sync; sync();
+}
+/* Быстрая запись расхода: мойка, страховка, налог, парковка, штраф… */
+function expenseDialog(preCat){
+  let cat = preCat || 'wash';
+  const insDocs = () => carDocs().filter(d=>d.type==='ogpo' || /страх|каско|огпо/i.test(d.name));
+  const body = () => {
+    const c = EXP_CATS.find(x=>x.id===cat), ins = insDocs();
+    return `
+    <div class="cats">${EXP_CATS.map(x=>`<button type="button" class="chip ${x.id===cat?'on':''}" data-cat="${x.id}">${x.icon} ${x.name}</button>`).join('')}</div>
+    <div class="form" style="margin-top:14px">
+      <label>Сумма, ₸<input id="e_cost" type="number" min="0" inputmode="numeric" required placeholder="0"></label>
+      <label>Дата<input id="e_date" type="date" required value="${today()}"></label>
+      ${cat==='insurance' && ins.length ? `
+        <label class="full">Полис<select id="e_doc">${ins.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('')}<option value="">Другой (без срока)</option></select></label>
+        <label class="full">Действует до<input id="e_exp" type="date" value="${addMonths(today(),12)}"></label>
+        <div class="note full" style="margin-top:-4px">Срок полиса обновится в «Документах», и приложение напомнит о следующем продлении.</div>` : ''}
+      <label class="full">Комментарий<input id="e_note" placeholder="${esc(c.hint||'')}"></label>
+    </div>`;
+  };
+  const draw = () => {
+    document.getElementById('dlgBody').innerHTML = body();
+    document.querySelectorAll('[data-cat]').forEach(b=>b.onclick = ()=>{
+      const v = $('e_cost').value; cat = b.dataset.cat;
+      if(cat==='tax'){ dlg.close(); renewDialog(taxDoc()); return; }
+      if(cat==='repair'){ dlg.close(); recordDialog(''); return; }
+      draw(); $('e_cost').value = v; $('e_cost').focus();
+    });
+  };
+  openDialog('Новый расход', '', [
+    {text:'Отмена', cls:'ghost'},
+    {text:'Сохранить', submit:true, onClick:()=>{
+      const c = EXP_CATS.find(x=>x.id===cat), cost = num('e_cost')||0, date = val('e_date'), note = val('e_note').trim();
+      const docId = cat==='insurance' && $('e_doc') ? $('e_doc').value : '';
+      if(docId){
+        const d = S.docs.find(x=>x.id===docId);
+        if(val('e_exp')) d.expires = val('e_exp');
+        S.records.push({id:uid(), carId:car().id, kind:'doc', docId, title:d.name, date, km:null, cost, note});
+      } else {
+        S.records.push({id:uid(), carId:car().id, kind:'other', cat, title: note || c.name, date, km:null, cost, note: note ? c.name : ''});
+      }
+      save(); render(); toast(`${c.icon} ${c.name}: ${tg(cost)} — записано`, null, null, 2500);
+    }},
+  ]);
+  draw();
+  setTimeout(()=>$('e_cost') && $('e_cost').focus(), 50);
 }
 function recalcItem(itemId){
   const it = S.items.find(i=>i.id===itemId); if(!it) return;
@@ -974,7 +1051,7 @@ function expenses(){
   const out = [];
   S.records.filter(r=>r.carId===c.id && r.cost).forEach(r=>{
     const it = r.itemId && S.items.find(i=>i.id===r.itemId);
-    out.push({date:r.date, title: it ? it.name : r.title, sub:[r.km?fmt(r.km)+' км':'', r.note].filter(Boolean).join(' · '), cost:r.cost, series: r.kind==='doc'?'doc':'service', ref:'rec', id:r.id});
+    out.push({date:r.date, title: it ? it.name : r.title, sub:[r.km?fmt(r.km)+' км':'', r.note].filter(Boolean).join(' · '), cost:r.cost, series: seriesOf(r), ref:'rec', id:r.id});
   });
   S.fillups.filter(f=>f.carId===c.id).forEach(f=>{
     out.push({date:f.date, title:`Заправка ${FUELS.find(q=>q.id===f.fuel)?.name||''}`, sub:`${fmt1(f.liters)} л × ${fmt(f.price)} ₸`, cost:f.liters*f.price, series:'fuel', ref:'fill', id:f.id});
@@ -1021,6 +1098,7 @@ const ACT = {
   newDoc: ()=>docDialog(null),
   renew: id=>renewDialog(S.docs.find(d=>d.id===id)),
   attach: id=>attachFiles(id),
+  expense: id=>expenseDialog(id),
   taxCalc: ()=>{ if(tab!=='money'){ tab='money'; render(); } $('taxCalc').scrollIntoView({behavior:'smooth'}); },
   viewFile: id=>viewFile(id),
   fill: ()=>fillDialog(),
@@ -1104,7 +1182,7 @@ function viewHome(){
   <div class="quick">
     <button data-act="fill">⛽ Заправка</button>
     <button class="ghost" data-act="scan">📷 Чек</button>
-    <button class="ghost" data-act="record">🔧 ТО</button>
+    <button class="ghost" data-act="expense">➕ Расход</button>
   </div>
   <h2>Ближайшее</h2>
   ${att.length ? `<div class="list">${att.map(a=>a.kind==='item'?itemCard(a.o):docCard(a.o)).join('')}</div>`
@@ -1228,7 +1306,7 @@ function viewFuel(){
 
 function viewMoney(){
   const ex = expenses(), keys = monthKeys(12);
-  const byM = Object.fromEntries(keys.map(k=>[k,{fuel:0,service:0,doc:0}]));
+  const byM = Object.fromEntries(keys.map(k=>[k,zeroSeries()]));
   ex.forEach(e=>{ const k=e.date.slice(0,7); if(byM[k]) byM[k][e.series]+=e.cost; });
   const totals = keys.map(k=>SERIES.reduce((a,s)=>a+byM[k][s.id],0));
   const sum12 = totals.reduce((a,b)=>a+b,0);
@@ -1243,7 +1321,7 @@ function viewMoney(){
   const max = niceMax(Math.max(...totals));
   const shown = ex.filter(e=>moneyFilter==='all' || e.series===moneyFilter);
   return `
-  <div class="row"><h2 class="sp" style="margin:4px 0">Сколько стоит машина</h2><button class="sm" data-act="record" data-id="">+ Расход</button></div>
+  <div class="row"><h2 class="sp" style="margin:4px 0">Сколько стоит машина</h2><button class="sm" data-act="expense">+ Расход</button></div>
   <div class="grid stats" style="margin-top:10px">
     <div class="card stat"><div class="k">В среднем в месяц</div><div class="v">${sum12?tg(sum12/nM):'—'}</div></div>
     <div class="card stat"><div class="k">Этот месяц</div><div class="v">${tg(byM[ym]?SERIES.reduce((a,s)=>a+byM[ym][s.id],0):0)}</div></div>
@@ -1265,7 +1343,7 @@ function viewMoney(){
       <div class="tip" id="tip" hidden></div>
     </div>
     <div class="chart-x">${keys.map(k=>`<span>${MONTHS[+k.slice(5)-1]}</span>`).join('')}</div>
-    <div class="legend">${bySeries12.map(s=>`<span style="--c:${s.c}">${s.name} · ${tg(s.v)}</span>`).join('')}</div>`
+    <div class="legend">${bySeries12.filter(s=>s.v>0).map(s=>`<span style="--c:${s.c}">${s.name} · ${tg(s.v)}</span>`).join('')}</div>`
     : `<div class="empty">Здесь появится график, когда вы добавите заправки, ТО или оплату страховки.</div>`}
   </div>
   <h2>Все расходы</h2>
@@ -1300,10 +1378,10 @@ function bindAfterRender(){
     const tip = $('tip'), ex = expenses();
     const show = col => {
       ch.querySelectorAll('.col.sel').forEach(c=>c.classList.remove('sel')); col.classList.add('sel');
-      const k = col.dataset.k, sums = {fuel:0,service:0,doc:0};
+      const k = col.dataset.k, sums = zeroSeries();
       ex.forEach(e=>{ if(e.date.startsWith(k)) sums[e.series]+=e.cost; });
       const total = SERIES.reduce((a,s)=>a+sums[s.id],0);
-      tip.innerHTML = `<b>${MONTHS_FULL[+k.slice(5)-1]} ${k.slice(0,4)}</b> · ${tg(total)}` + SERIES.map(s=>`<div class="r"><span style="--c:${s.c}">${s.name}</span><span>${tg(sums[s.id])}</span></div>`).join('');
+      tip.innerHTML = `<b>${MONTHS_FULL[+k.slice(5)-1]} ${k.slice(0,4)}</b> · ${tg(total)}` + SERIES.filter(s=>sums[s.id]>0).map(s=>`<div class="r"><span style="--c:${s.c}">${s.name}</span><span>${tg(sums[s.id])}</span></div>`).join('');
       tip.hidden = false;
       const cr = ch.getBoundingClientRect(), r = col.getBoundingClientRect();
       const half = tip.offsetWidth/2, x = Math.max(half - 44, Math.min(cr.width - half, r.left - cr.left + r.width/2));
