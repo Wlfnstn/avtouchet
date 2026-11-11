@@ -170,6 +170,8 @@ dialog.full .df{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 .tax-lines{display:grid;gap:4px;font-size:13px;margin-top:10px}
 .tax-lines div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:4px}
 .tax-lines div:last-child{border-bottom:0}
+.tax-calc{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.tax-calc summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600;list-style-position:inside}
 .tax-lines span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 [hidden]{display:none!important}
 @media (max-width:420px){.form{grid-template-columns:1fr}.chart,.chart-x{margin-left:38px}.chart-x span:nth-child(odd){visibility:hidden}}
@@ -400,7 +402,7 @@ function docStatus(d){
   const isTax = d.type==='tax';
   if(left<0) return {cls:'bad', label: isTax?'Не оплачен':'Просрочено', pct:1, left, text:`${isTax?'срок уплаты прошёл':'истекло'} ${fmt(-left)} дн. назад`};
   if(left<=d.remind) return {cls: left<=7?'bad':'warn', label: left===0?'Сегодня':`${left} дн.`, pct, left, text:`${isTax?'оплатить до':'действует до'} ${dstr(d.expires)} · осталось ${humanDays(left)}`};
-  return {cls:'ok', label:'Действует', pct, left, text:`${isTax?'оплатить до':'до'} ${dstr(d.expires)} · ${humanDays(left)}`};
+  return {cls:'ok', label: isTax ? `через ${humanDays(left)}` : 'Действует', pct, left, text:`${isTax?'оплатить до':'до'} ${dstr(d.expires)} · ${humanDays(left)}`};
 }
 const barColor = {ok:'var(--ok)', warn:'var(--warn)', bad:'var(--bad)', none:'var(--line)'};
 function attention(){
@@ -752,24 +754,46 @@ function filesHtml(d){
 const blobToDataUrl = b => new Promise((ok,fail)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=fail; r.readAsDataURL(b); });
 
 /* ===================== Калькулятор налога ===================== */
+function taxDoc(){
+  let d = carDocs().find(x=>x.type==='tax');
+  if(!d){ d = {id:uid(), carId:car().id, type:'tax', name:'Налог на транспорт', period:12, remind:30, expires:nextApril1(), note:''}; S.docs.push(d); save(); }
+  return d;
+}
+// За какой год налог к ближайшему сроку оплаты (срок 1 апреля следующего года)
+const taxYearFor = d => d && d.expires ? Math.max(2026, +d.expires.slice(0,4) - 1) : taxYearNow();
 function taxCard(){
-  const c = car(), ty = taxYearNow();
+  const c = car(), d = taxDoc(), ty = taxYearFor(d), st = docStatus(d);
   const r = transportTax({cc:c.engineCc, year:c.year, months:c.taxMonths||12, ev:c.ev, taxYear:ty});
+  const last = S.records.filter(x=>x.docId===d.id).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const head = `
+    <div class="item-head">
+      <div class="sp"><div class="small muted">За ${ty} год · оплатить до ${dstr(d.expires)}</div>
+        <div class="tax-total">${r ? tg(r.total) : '—'}</div></div>
+      <span class="badge b-${st.cls}">${st.label}</span>
+    </div>
+    ${last?`<div class="small" style="color:var(--ok)">✓ Последняя оплата ${dstr(last.date)}${last.cost?' — '+tg(last.cost):''}</div>`:''}
+    <div class="row" style="margin-top:12px;gap:8px">
+      <button class="sp" data-act="renew" data-id="${d.id}">✓ Оплатил</button>
+      <button class="ghost" data-act="doc" data-id="${d.id}">Изменить срок</button>
+    </div>`;
   const lines = !r ? '' : r.ev ? `<div><span>Электромобиль — объём двигателя 0</span><span>0 ₸</span></div>` : `
       <div><span>Ставка: ${r.k} МРП × ${fmt(r.mrp)} ₸</span><span>${fmt(r.base)} ₸</span></div>
       ${r.extra?`<div><span>Доплата: ${fmt(c.engineCc - r.lower)} см³ × 7 ₸</span><span>+ ${fmt(r.extra)} ₸</span></div>`:''}
       ${c.year?`<div><span>Возраст ${r.age} ${plural(r.age,'год','года','лет')}${r.coef<1?'':' (скидки нет до 11 лет)'}</span><span>× ${String(r.coef).replace('.',',')}</span></div>`:''}
       ${r.months<12?`<div><span>Владели ${r.months} из 12 мес.</span><span>× ${r.months}/12</span></div>`:''}`;
   return `<div class="card">
-    <div class="form">
+    ${head}
+    <details class="tax-calc" ${r?'':'open'}>
+      <summary>${r ? 'Как посчитано · изменить данные' : 'Посчитать сумму: укажите объём двигателя'}</summary>
+    <div class="form" style="margin-top:12px">
       <label>Объём двигателя, см³<input id="t_cc" type="number" min="0" inputmode="numeric" placeholder="например 2494" value="${c.engineCc||''}" ${c.ev?'disabled':''}></label>
       <label>Год выпуска<input id="t_year" type="number" min="1950" max="${ty}" inputmode="numeric" placeholder="по техпаспорту" value="${c.year||''}"></label>
       <label>Месяцев владения в ${ty} году<input id="t_mo" type="number" min="1" max="12" inputmode="numeric" value="${c.taxMonths||12}"></label>
       <label class="check" style="align-self:end;padding-bottom:10px"><input id="t_ev" type="checkbox" ${c.ev?'checked':''}> Электромобиль</label>
     </div>
-    ${r ? `<div style="margin-top:14px"><div class="small muted">Налог за ${ty} год · оплатить до 1 апреля ${ty+1}</div><div class="tax-total">${tg(r.total)}</div>
-      <div class="tax-lines">${lines}</div></div>` : `<div class="note">Введите объём двигателя из техпаспорта — сумма посчитается сразу.</div>`}
+    ${r ? `<div class="tax-lines">${lines}<div><b>Итого за ${ty} год</b><b>${tg(r.total)}</b></div></div>` : ''}
     <div class="note">Расчёт по Налоговому кодексу РК (с 2026 года), МРП ${fmt(r?r.mrp:MRP[2026])} ₸${r&&r.mrpGuess?` — МРП на ${ty} год ещё не учтён, сумма ориентировочная`:''}. Возраст: свыше 10 лет — ×0,7, свыше 20 лет — ×0,5. Льготы (ветераны, лица с инвалидностью и др.) не учитываются. Точную сумму к оплате смотрите в eGov, Kaspi или приложении банка.</div>
+    </details>
   </div>`;
 }
 function bindTax(){
@@ -778,7 +802,7 @@ function bindTax(){
     const c = car();
     c.engineCc = num('t_cc'); c.year = num('t_year'); c.taxMonths = num('t_mo') || 12; c.ev = $('t_ev').checked;
     save();
-    const y = scrollY; render(); scrollTo(0, y);
+    const y = scrollY; render(); const dd = document.querySelector('details.tax-calc'); if(dd) dd.open = true; scrollTo(0, y);
   };
   ['t_cc','t_year','t_mo'].forEach(id=>$(id).onchange = upd);
   $('t_ev').onchange = upd;
@@ -972,8 +996,10 @@ function render(){
   $('carSel').innerHTML = S.cars.map(c=>`<option value="${c.id}" ${c.id===car().id?'selected':''}>${esc(c.name)}</option>`).join('');
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
   const att = attention();
-  const svcN = att.filter(a=>a.kind==='item').length, docN = att.filter(a=>a.kind==='doc' && a.s.cls==='bad').length;
-  setDot('service', svcN); setDot('docs', docN);
+  const svcN = att.filter(a=>a.kind==='item').length;
+  const docN = att.filter(a=>a.kind==='doc' && a.o.type!=='tax' && a.s.cls==='bad').length;
+  const taxN = att.filter(a=>a.kind==='doc' && a.o.type==='tax').length;
+  setDot('service', svcN); setDot('docs', docN); setDot('money', taxN);
   const v = $('view');
   v.innerHTML = ({home:viewHome, service:viewService, docs:viewDocs, fuel:viewFuel, money:viewMoney})[tab]();
   v.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click', e=>{ e.preventDefault(); ACT[el.dataset.act](el.dataset.id); }));
@@ -995,7 +1021,7 @@ const ACT = {
   newDoc: ()=>docDialog(null),
   renew: id=>renewDialog(S.docs.find(d=>d.id===id)),
   attach: id=>attachFiles(id),
-  taxCalc: ()=>{ if(tab!=='docs'){ tab='docs'; render(); } $('taxCalc').scrollIntoView({behavior:'smooth'}); },
+  taxCalc: ()=>{ if(tab!=='money'){ tab='money'; render(); } $('taxCalc').scrollIntoView({behavior:'smooth'}); },
   viewFile: id=>viewFile(id),
   fill: ()=>fillDialog(),
   scan: scanReceipt,
@@ -1022,16 +1048,16 @@ function itemCard(it){
       <button class="sm" data-act="record" data-id="${it.id}">Заменил</button></div>
   </div>`;
 }
-function taxAmount(){ const c = car(); const r = transportTax({cc:c.engineCc, year:c.year, months:c.taxMonths||12, ev:c.ev}); return r ? r.total : null; }
+function taxAmount(){ const c = car(); const r = transportTax({cc:c.engineCc, year:c.year, months:c.taxMonths||12, ev:c.ev, taxYear:taxYearFor(carDocs().find(x=>x.type==='tax'))}); return r ? r.total : null; }
 function docCard(d, withFiles){
   const st = docStatus(d);
   return `<div class="card item">
     <div class="item-head">
-      <div class="sp"><div class="tag">Документ</div><div class="item-title">${esc(d.name)}</div>${d.note?`<div class="small muted">${esc(d.note)}</div>`:''}</div>
+      <div class="sp"><div class="tag">${d.type==='tax'?'Обязательный платёж':'Документ'}</div><div class="item-title">${esc(d.name)}</div>${d.note?`<div class="small muted">${esc(d.note)}</div>`:''}</div>
       <span class="badge b-${st.cls}">${st.label}</span>
     </div>
     ${d.expires?`<div class="bar"><i style="width:${Math.min(100,st.pct*100)}%;background:${barColor[st.cls]}"></i></div>`:''}
-    ${d.type==='tax' && taxAmount()!=null ? `<div class="small">Сумма по расчёту: <b>${tg(taxAmount())}</b> · <a href="#" data-act="taxCalc">расчёт</a></div>` : (d.type==='tax' && withFiles ? `<div class="small"><a href="#" data-act="taxCalc">Посчитать сумму налога →</a></div>` : '')}
+    ${d.type==='tax' ? `<div class="small">${taxAmount()!=null ? `Сумма по расчёту: <b>${tg(taxAmount())}</b> · ` : ''}<a href="#" data-act="taxCalc">${taxAmount()!=null?'подробнее':'посчитать сумму →'}</a></div>` : ''}
     ${withFiles && d.type!=='tax' ? filesHtml(d) : (S.files.some(f=>f.docId===d.id) ? `<div class="small muted">📎 Файлов: ${S.files.filter(f=>f.docId===d.id).length}</div>` : '')}
     <div class="row small"><span class="sp muted">${st.text}</span>
       <button class="ghost sm" data-act="doc" data-id="${d.id}">${d.expires?'Изм.':'Указать дату'}</button>
@@ -1061,7 +1087,7 @@ function viewHome(){
   const nMonths = Math.max(1, monthKeys(12).filter(k=>k>=firstMonth).length);
   const avgMonth = ex12.reduce((a,b)=>a+b.cost,0)/nMonths;
   const {avg} = fuelStats();
-  const noDocs = carDocs().filter(d=>!d.expires).length;
+  const noDocs = carDocs().filter(d=>!d.expires && d.type!=='tax').length;
   return `
   ${mileageBanner()}
   <div class="grid stats">
@@ -1171,10 +1197,9 @@ function viewDocs(){
   return `
   <div class="row"><h2 class="sp" style="margin:4px 0">Документы и сроки</h2><button class="ghost sm" data-act="newDoc">+ Документ</button></div>
   <p class="small muted">Приложение напомнит заранее. К каждому документу можно прикрепить PDF или фото — полис, техпаспорт, права, диагностическую карту.</p>
-  <div class="list">${docs.map(d=>docCard(d, true)).join('')}</div>
+  <div class="list">${docs.filter(d=>d.type!=='tax').map(d=>docCard(d, true)).join('')}</div>
   <div class="note" style="margin-top:12px">Добавьте свои: КАСКО, доверенность, техпаспорт, аптечка/огнетушитель и т.п. Файлы хранятся только на этом телефоне. Официальные цифровые документы (права, техпаспорт) — в eGov Mobile или Kaspi; здесь — ваши копии под рукой.</div>
-  <h2 id="taxCalc" style="scroll-margin-top:80px">Налог на транспорт — калькулятор</h2>
-  ${taxCard()}`;
+  <div class="note">Налог на транспорт — в разделе <a href="#" data-act="taxCalc">Расходы</a>.</div>`;
 }
 
 function viewFuel(){
@@ -1225,8 +1250,11 @@ function viewMoney(){
     <div class="card stat"><div class="k">С начала ${y} года</div><div class="v">${tg(year)}</div></div>
     <div class="card stat"><div class="k">1 км обходится в</div><div class="v">${kmSpan>100&&sum12?fmt1(sum12/kmSpan)+' ₸':'—'}</div></div>
   </div>
-  <div class="card" style="margin-top:12px">
-    <div class="row"><div class="sp item-title">Расходы по месяцам</div><span class="small muted">12 мес. · ${tg(sum12)}</span></div>
+  <h2 id="taxCalc" style="scroll-margin-top:80px">Налог на транспорт</h2>
+  ${taxCard()}
+  <h2>Расходы по месяцам</h2>
+  <div class="card">
+    <div class="row"><div class="sp small muted">Последние 12 месяцев</div><span class="small muted">${tg(sum12)}</span></div>
     ${sum12 ? `
     <div class="chart" id="chart" role="img" aria-label="Расходы по месяцам за последние 12 месяцев">
       ${[1,0.5,0].map(f=>`<div class="gl ${f===0?'base':''}" style="top:${(1-f)*100}%"><span>${f?tgShort(max*f):'0'}</span></div>`).join('')}
