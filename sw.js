@@ -1,6 +1,6 @@
 // АвтоУчёт — service worker: офлайн-работа и напоминания
 // При изменении файлов приложения увеличьте версию, чтобы обновить кэш.
-const VERSION = 'v9';
+const VERSION = 'v10';
 const LIBS = 'avtouchet-libs';          // pdf.js и т.п. с CDN, переживает обновления
 const CACHE = `avtouchet-${VERSION}`;
 const DATA = 'avtouchet-data';          // снимок сроков от страницы + журнал отправленных уведомлений
