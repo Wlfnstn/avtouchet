@@ -1,6 +1,6 @@
 // АвтоУчёт — service worker: офлайн-работа и напоминания
 // При изменении файлов приложения увеличьте версию, чтобы обновить кэш.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = `avtouchet-${VERSION}`;
 const DATA = 'avtouchet-data';          // снимок сроков от страницы + журнал отправленных уведомлений
 const ASSETS = [

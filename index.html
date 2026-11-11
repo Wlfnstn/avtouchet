@@ -56,7 +56,12 @@ h2:first-child{margin-top:4px}
 .grid{display:grid;gap:10px}
 .stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .stat .k{color:var(--muted);font-size:13px}
-.stat .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat .v{font-size:clamp(18px,5.2vw,22px);font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .stat-btn{margin-top:auto;width:100%}
+.quick{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;margin-top:12px}
+.quick button{white-space:nowrap;padding:11px 8px}
+.stat .small + .stat-btn{margin-top:10px}
 .row{display:flex;gap:10px;align-items:center}
 .row.wrapr{flex-wrap:wrap}
 .sp{flex:1;min-width:0}
@@ -833,7 +838,8 @@ function viewHome(){
   ${mileageBanner()}
   <div class="grid stats">
     <div class="card stat"><div class="k">Пробег</div><div class="v">${est!==c.mileage?'≈ ':''}${fmt(est)} км</div>
-      <div class="row wrapr small" style="margin-top:6px;gap:6px"><span class="sp muted" style="white-space:nowrap">${rate?`~${fmt(rate*30.4)} км/мес`:'обновляйте раз в неделю'}</span><button class="ghost sm" data-act="mileage">Обновить</button></div></div>
+      <div class="small muted" style="margin-top:4px">${rate?`в среднем ${fmt(rate*30.4)} км в месяц`:'обновляйте раз в неделю'}</div>
+      <button class="ghost sm stat-btn" data-act="mileage">Обновить пробег</button></div>
     <div class="card stat"><div class="k">Требуют внимания</div><div class="v" style="color:${att.length?'var(--warn)':'var(--ok)'}">${att.length}</div>
       <div class="small muted" style="margin-top:8px">${unknown||noDocs?[unknown?`${unknown} ТО без данных`:'', noDocs?`${noDocs} док. без даты`:''].filter(Boolean).join(', '):'всё отслеживается'}</div></div>
     <div class="card stat"><div class="k">Машина стоит в месяц</div><div class="v">${ex12.length?tg(avgMonth):'—'}</div>
@@ -841,10 +847,10 @@ function viewHome(){
     <div class="card stat"><div class="k">Средний расход</div><div class="v">${avg?fmt1(avg):fmt1(c.consumption)} л</div>
       <div class="small muted" style="margin-top:8px">${avg?'по заправкам':'указан вручную'} · на 100 км</div></div>
   </div>
-  <div class="row wrapr" style="margin-top:12px">
-    <button class="sp" data-act="fill">⛽ Заправка</button>
-    <button class="sp ghost" data-act="scan">📷 Чек АЗС</button>
-    <button class="sp ghost" data-act="record">🔧 Запись ТО</button>
+  <div class="quick">
+    <button data-act="fill">⛽ Заправка</button>
+    <button class="ghost" data-act="scan">📷 Чек</button>
+    <button class="ghost" data-act="record">🔧 ТО</button>
   </div>
   <h2>Ближайшее</h2>
   ${att.length ? `<div class="list">${att.map(a=>a.kind==='item'?itemCard(a.o):docCard(a.o)).join('')}</div>`
