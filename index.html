@@ -139,6 +139,20 @@ dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end;fle
 .tip b{font-size:13px}
 .tip .r{display:flex;gap:10px;justify-content:space-between}
 .tip .r span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--c);margin-right:6px}
+/* Файлы документов */
+.files{display:flex;gap:6px;flex-wrap:wrap}
+.file{display:inline-flex;align-items:center;gap:6px;max-width:100%;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:500;font-size:13px;padding:6px 10px;border-radius:10px}
+.file span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+.file.add{color:var(--accent);border-style:dashed;background:transparent}
+.viewer img{display:block;max-width:100%;max-height:60vh;margin:0 auto;border-radius:8px}
+.viewer .pdf{display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px 0;color:var(--muted)}
+.viewer .pdf b{color:var(--text);font-size:15px;word-break:break-all;text-align:center}
+/* Налог */
+.tax-total{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.tax-lines{display:grid;gap:4px;font-size:13px;margin-top:10px}
+.tax-lines div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.tax-lines div:last-child{border-bottom:0}
+.tax-lines span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
 [hidden]{display:none!important}
 @media (max-width:420px){.form{grid-template-columns:1fr}.chart,.chart-x{margin-left:38px}.chart-x span:nth-child(odd){visibility:hidden}}
 </style>
@@ -213,6 +227,32 @@ const SERIES = [
   {id:'doc',     name:'Документы и налоги',   c:'var(--s3)'},
 ];
 
+/* ===================== Налог на транспорт (Налоговый кодекс РК, с 2026 года) ===================== */
+// МРП по годам (закон о республиканском бюджете). Для будущих лет — последний известный.
+const MRP = {2025:3932, 2026:4325};
+const TAX_BANDS = [ // [верхняя граница см³ включительно, ставка в МРП, нижняя граница для доплаты 7 ₸/см³]
+  [1100, 1, null], [1500, 2, null], [2000, 3, 1500], [2500, 6, 2000],
+  [3000, 9, 2500], [4000, 15, 3000], [Infinity, 117, 4000],
+];
+// За какой год платим сейчас: до 1 апреля — за прошлый год, после — за текущий (правила с 2026 года)
+function taxYearNow(){ const d = new Date(), y = d.getFullYear(); return Math.max(2026, d.getMonth() < 3 ? y-1 : y); }
+function transportTax({cc, year, months=12, ev=false, taxYear}){
+  taxYear = taxYear || taxYearNow();
+  const years = Object.keys(MRP).map(Number), lastKnown = Math.max(...years);
+  const mrp = MRP[taxYear] || MRP[lastKnown];
+  const res = {taxYear, mrp, mrpGuess: !MRP[taxYear], lines:[]};
+  if(ev){ res.total = 0; res.ev = true; return res; }
+  if(!cc || cc<=0) return null;
+  const [upper, k, lower] = TAX_BANDS.find(b=>cc<=b[0]);
+  const base = k*mrp, extra = lower!=null ? 7*(cc-lower) : 0;
+  const age = year ? taxYear - year : 0;
+  const coef = age>20 ? 0.5 : age>10 ? 0.7 : 1;
+  const m = Math.min(12, Math.max(1, months||12));
+  res.base = base; res.extra = extra; res.coef = coef; res.age = age; res.months = m; res.k = k; res.lower = lower;
+  res.total = Math.round((base+extra)*coef*m/12);
+  return res;
+}
+
 /* ===================== Даты ===================== */
 const pad = n => String(n).padStart(2,'0');
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;   // локальная дата, не UTC
@@ -239,13 +279,13 @@ function freshState(){
     activeCarId: carId,
     items: itemsFromTemplate(carId),
     docs: docsFromTemplate(carId),
-    records: [], fillups: [], mileageLog: [],
+    records: [], fillups: [], mileageLog: [], files: [],
     prices: {...DEFAULT_PRICES}, pricesUpdated: null,
     settings: {notify:false},
   };
 }
 function migrate(s){
-  s.items ||= []; s.records ||= []; s.fillups ||= []; s.mileageLog ||= []; s.settings ||= {notify:false};
+  s.items ||= []; s.records ||= []; s.fillups ||= []; s.mileageLog ||= []; s.files ||= []; s.settings ||= {notify:false};
   s.prices ||= {...DEFAULT_PRICES};
   if(!s.docs){ s.docs = []; s.cars.forEach(c=>s.docs.push(...docsFromTemplate(c.id))); }
   s.records.forEach(r=>{ if(!r.kind) r.kind = r.itemId ? 'service' : 'other'; });
@@ -394,6 +434,8 @@ function carDialog(isNew){
       <label class="full">Название<input id="f_name" required value="${esc(c.name)}" placeholder="Toyota Camry 2018"></label>
       <label>Текущий пробег, км<input id="f_mil" type="number" min="0" inputmode="numeric" required value="${c.mileage}"></label>
       <label>Расход, л/100 км<input id="f_cons" type="number" step="0.1" min="0" value="${c.consumption}"></label>
+      <label>Объём двигателя, см³<input id="f_cc" type="number" min="0" inputmode="numeric" value="${c.engineCc||''}" placeholder="для налога"></label>
+      <label>Год выпуска<input id="f_year" type="number" min="1950" max="${new Date().getFullYear()+1}" inputmode="numeric" value="${c.year||''}"></label>
       <label class="full">Топливо<select id="f_fuel">${FUELS.map(f=>`<option value="${f.id}" ${f.id===c.fuel?'selected':''}>${f.name}</option>`).join('')}</select></label>
     </div>
     ${isNew?'':`<div class="row wrapr" style="margin-top:14px">
@@ -406,7 +448,7 @@ function carDialog(isNew){
   `, [
     {text:'Отмена', cls:'ghost'},
     {text:'Сохранить', submit:true, onClick:()=>{
-      const data = {name:val('f_name').trim(), consumption:num('f_cons')||0, fuel:val('f_fuel')};
+      const data = {name:val('f_name').trim(), consumption:num('f_cons')||0, fuel:val('f_fuel'), engineCc:num('f_cc'), year:num('f_year')};
       const km = num('f_mil')||0;
       if(isNew){
         const id = uid();
@@ -430,6 +472,7 @@ function carDialog(isNew){
     if(del) del.onclick = ()=>{
       if(!confirm(`Удалить «${car().name}» со всей историей?`)) return;
       const id = car().id;
+      removeFiles(S.files.filter(f=>f.carId===id).map(f=>f.id));
       S.cars = S.cars.filter(c=>c.id!==id);
       ['items','records','fillups','docs','mileageLog'].forEach(k=>S[k] = S[k].filter(x=>x.carId!==id));
       S.activeCarId = S.cars[0].id; save(); dlg.close(); render();
@@ -444,9 +487,13 @@ function mileageDialog(){
     [{text:'Отмена',cls:'ghost'},{text:'Сохранить',submit:true,onClick:()=>{ setMileage(num('f_mil')||0, today(), true); save(); render(); toast('Пробег обновлён', null, null, 2000); }}]);
   setTimeout(()=>{ const i=$('f_mil'); i && i.select(); },50);
 }
-function exportData(){
-  const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+async function exportData(){
+  // В резервную копию кладём и файлы документов (в base64), чтобы их можно было перенести на новый телефон
+  const blobs = {};
+  for(const f of S.files){ try{ const r = await fileDb.get(f.id); if(r) blobs[f.id] = await blobToDataUrl(r.blob); }catch(e){} }
+  const blob = new Blob([JSON.stringify({...S, fileData: blobs})],{type:'application/json'});
   download(blob, `avtouchet-${today()}.json`);
+  if(S.files.length) toast(`Копия сохранена вместе с файлами (${S.files.length})`, null, null, 3000);
 }
 function download(blob, name){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
@@ -455,7 +502,12 @@ function download(blob, name){
 function importData(){
   const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json,.json';
   inp.onchange = async ()=>{
-    try{ const d = JSON.parse(await inp.files[0].text()); if(!d.cars||!d.items) throw 0; S=migrate(d); save(); dlg.close(); render(); toast('Данные загружены', null, null, 2500); }
+    try{
+      const d = JSON.parse(await inp.files[0].text()); if(!d.cars||!d.items) throw 0;
+      const data = d.fileData || {}; delete d.fileData;
+      for(const [id, url] of Object.entries(data)){ try{ const b = await (await fetch(url)).blob(); await fileDb.put({id, blob:b}); }catch(e){} }
+      S=migrate(d); save(); dlg.close(); render(); toast('Данные загружены', null, null, 2500);
+    }
     catch(e){ alert('Не удалось прочитать файл'); }
   };
   inp.click();
@@ -532,7 +584,7 @@ function docDialog(d){
     </div>
     ${d.type==='tax'?'<div class="note">Физлица платят налог на транспорт за год до 1 апреля следующего года. Проверить задолженность можно в eGov или в приложении банка.</div>':''}`,
   [
-    ...(isNew?[]:[{text:'Удалить',cls:'danger',onClick:()=>{ if(!confirm('Удалить документ?')) return false; S.docs=S.docs.filter(x=>x.id!==d.id); save(); render(); }}]),
+    ...(isNew?[]:[{text:'Удалить',cls:'danger',onClick:()=>{ if(!confirm('Удалить документ и прикреплённые файлы?')) return false; removeFiles(S.files.filter(f=>f.docId===d.id).map(f=>f.id)); S.docs=S.docs.filter(x=>x.id!==d.id); save(); render(); }}]),
     {text:'Отмена',cls:'ghost'},
     {text:'Сохранить',submit:true,onClick:()=>{
       const v = {name:val('f_name').trim(), expires:val('f_exp')||null, remind:num('f_rem')??30, period:num('f_per')||12, note:val('f_note').trim()};
@@ -548,7 +600,7 @@ function renewDialog(d){
   openDialog(isTax ? 'Налог оплачен' : `Продлить: ${d.name}`, `
     <div class="form">
       <label>Дата оплаты<input id="f_date" type="date" required value="${today()}"></label>
-      <label>Стоимость, ₸<input id="f_cost" type="number" min="0" inputmode="numeric"></label>
+      <label>Стоимость, ₸<input id="f_cost" type="number" min="0" inputmode="numeric" value="${isTax && taxAmount()!=null ? taxAmount() : ''}"></label>
       <label class="full">${isTax?'Следующий срок уплаты':'Новая дата окончания'}<input id="f_exp" type="date" required value="${next}"></label>
     </div>`,
   [
@@ -560,6 +612,121 @@ function renewDialog(d){
       save(); render(); toast(`${d.name}: следующий срок ${dstr(d.expires)}`, null, null, 3000);
     }},
   ]);
+}
+
+/* ===================== Файлы документов (IndexedDB, только на этом устройстве) ===================== */
+const fileDb = (()=>{
+  let p;
+  const open = ()=> p || (p = new Promise((ok,fail)=>{
+    const r = indexedDB.open('avtouchet', 1);
+    r.onupgradeneeded = ()=> r.result.createObjectStore('files', {keyPath:'id'});
+    r.onsuccess = ()=> ok(r.result); r.onerror = ()=> fail(r.error);
+  }));
+  const run = async (mode, fn)=>{
+    const db = await open();
+    return new Promise((ok,fail)=>{
+      const t = db.transaction('files', mode), req = fn(t.objectStore('files'));
+      t.oncomplete = ()=> ok(req && 'result' in req ? req.result : undefined);
+      t.onerror = ()=> fail(t.error); t.onabort = ()=> fail(t.error);
+    });
+  };
+  return {
+    put: f => run('readwrite', s=>s.put(f)),
+    get: id => run('readonly', s=>s.get(id)),
+    del: id => run('readwrite', s=>s.delete(id)),
+  };
+})();
+const fmtSize = b => b>=1048576 ? fmt1(b/1048576)+' МБ' : Math.max(1,Math.round(b/1024))+' КБ';
+const isImg = t => /^image\//.test(t);
+// Большие фото уменьшаем до 2400 px, чтобы не забивать память телефона
+async function shrinkImage(file){
+  if(!isImg(file.type) || file.size < 1.5*1048576 || /gif|svg/.test(file.type)) return file;
+  try{
+    const bmp = await createImageBitmap(file, {imageOrientation:'from-image'});
+    const k = Math.min(1, 2400/Math.max(bmp.width, bmp.height));
+    const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width*k); cv.height = Math.round(bmp.height*k);
+    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(r=>cv.toBlob(r, 'image/jpeg', 0.85));
+    return blob && blob.size < file.size ? new File([blob], file.name.replace(/\.\w+$/,'')+'.jpg', {type:'image/jpeg'}) : file;
+  }catch(e){ return file; }
+}
+function attachFiles(docId){
+  const inp = document.createElement('input'); inp.type='file'; inp.multiple = true;
+  inp.accept = 'application/pdf,image/*,.pdf';
+  inp.onchange = async ()=>{
+    const list = [...inp.files]; if(!list.length) return;
+    let added = 0;
+    for(const f0 of list){
+      if(f0.size > 25*1048576){ alert(`«${f0.name}» больше 25 МБ — слишком большой файл`); continue; }
+      const f = await shrinkImage(f0);
+      const meta = {id:uid(), docId, carId:car().id, name:f.name || 'Документ', type:f.type || 'application/octet-stream', size:f.size, added:today()};
+      try{ await fileDb.put({id:meta.id, blob:f}); S.files.push(meta); added++; }
+      catch(e){ alert('Не удалось сохранить файл — возможно, на телефоне закончилось место.'); }
+    }
+    if(added){ save(); render(); toast(`Добавлено файлов: ${added}`, null, null, 2000); }
+  };
+  inp.click();
+}
+async function viewFile(id){
+  const meta = S.files.find(f=>f.id===id); if(!meta) return;
+  const rec = await fileDb.get(id).catch(()=>null);
+  if(!rec){ alert('Файл не найден на этом устройстве. Если вы переносили данные — загрузите резервную копию с файлами.'); return; }
+  const blob = rec.blob, url = URL.createObjectURL(blob);
+  const canShare = navigator.canShare && navigator.canShare({files:[new File([blob], meta.name, {type:meta.type})]});
+  openDialog(meta.name, `<div class="viewer">${isImg(meta.type)
+    ? `<img src="${url}" alt="${esc(meta.name)}">`
+    : `<div class="pdf"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><b>${esc(meta.name)}</b><span class="small">${fmtSize(meta.size)} · добавлен ${dstr(meta.added)}</span></div>`}
+    <div class="note">Хранится только на этом телефоне. Чтобы не потерять — делайте резервную копию (⚙︎ → Экспорт).</div></div>`,
+  [
+    {text:'Удалить', cls:'danger', onClick:()=>{ if(!confirm(`Удалить «${meta.name}»?`)) return false; removeFiles([id]); render(); }},
+    ...(canShare ? [{text:'Поделиться', cls:'ghost', onClick:()=>{ navigator.share({files:[new File([blob], meta.name, {type:meta.type})], title:meta.name}).catch(()=>{}); return false; }}] : []),
+    {text:'Открыть', onClick:()=>{ const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; if(!isImg(meta.type) && !/pdf/.test(meta.type)) a.download=meta.name; document.body.appendChild(a); a.click(); a.remove(); return false; }},
+    {text:'Закрыть', cls:'ghost'},
+  ]);
+  dlg.addEventListener('close', ()=>setTimeout(()=>URL.revokeObjectURL(url), 60000), {once:true});
+}
+function removeFiles(ids){
+  ids.forEach(id=>fileDb.del(id).catch(()=>{}));
+  S.files = S.files.filter(f=>!ids.includes(f.id)); save();
+}
+function filesHtml(d){
+  const fs = S.files.filter(f=>f.docId===d.id);
+  return `<div class="files">${fs.map(f=>`<button class="file" data-act="viewFile" data-id="${f.id}" title="${esc(f.name)}">${isImg(f.type)?'🖼':'📄'} <span>${esc(f.name)}</span></button>`).join('')}
+    <button class="file add" data-act="attach" data-id="${d.id}">📎 ${fs.length?'Ещё файл':'Прикрепить PDF или фото'}</button></div>`;
+}
+const blobToDataUrl = b => new Promise((ok,fail)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=fail; r.readAsDataURL(b); });
+
+/* ===================== Калькулятор налога ===================== */
+function taxCard(){
+  const c = car(), ty = taxYearNow();
+  const r = transportTax({cc:c.engineCc, year:c.year, months:c.taxMonths||12, ev:c.ev, taxYear:ty});
+  const lines = !r ? '' : r.ev ? `<div><span>Электромобиль — объём двигателя 0</span><span>0 ₸</span></div>` : `
+      <div><span>Ставка: ${r.k} МРП × ${fmt(r.mrp)} ₸</span><span>${fmt(r.base)} ₸</span></div>
+      ${r.extra?`<div><span>Доплата: ${fmt(c.engineCc - r.lower)} см³ × 7 ₸</span><span>+ ${fmt(r.extra)} ₸</span></div>`:''}
+      ${c.year?`<div><span>Возраст ${r.age} ${plural(r.age,'год','года','лет')}${r.coef<1?'':' (скидки нет до 11 лет)'}</span><span>× ${String(r.coef).replace('.',',')}</span></div>`:''}
+      ${r.months<12?`<div><span>Владели ${r.months} из 12 мес.</span><span>× ${r.months}/12</span></div>`:''}`;
+  return `<div class="card">
+    <div class="form">
+      <label>Объём двигателя, см³<input id="t_cc" type="number" min="0" inputmode="numeric" placeholder="например 2494" value="${c.engineCc||''}" ${c.ev?'disabled':''}></label>
+      <label>Год выпуска<input id="t_year" type="number" min="1950" max="${ty}" inputmode="numeric" placeholder="по техпаспорту" value="${c.year||''}"></label>
+      <label>Месяцев владения в ${ty} году<input id="t_mo" type="number" min="1" max="12" inputmode="numeric" value="${c.taxMonths||12}"></label>
+      <label class="check" style="align-self:end;padding-bottom:10px"><input id="t_ev" type="checkbox" ${c.ev?'checked':''}> Электромобиль</label>
+    </div>
+    ${r ? `<div style="margin-top:14px"><div class="small muted">Налог за ${ty} год · оплатить до 1 апреля ${ty+1}</div><div class="tax-total">${tg(r.total)}</div>
+      <div class="tax-lines">${lines}</div></div>` : `<div class="note">Введите объём двигателя из техпаспорта — сумма посчитается сразу.</div>`}
+    <div class="note">Расчёт по Налоговому кодексу РК (с 2026 года), МРП ${fmt(r?r.mrp:MRP[2026])} ₸${r&&r.mrpGuess?` — МРП на ${ty} год ещё не учтён, сумма ориентировочная`:''}. Возраст: свыше 10 лет — ×0,7, свыше 20 лет — ×0,5. Льготы (ветераны, лица с инвалидностью и др.) не учитываются. Точную сумму к оплате смотрите в eGov, Kaspi или приложении банка.</div>
+  </div>`;
+}
+function bindTax(){
+  const cc = $('t_cc'); if(!cc) return;
+  const upd = ()=>{
+    const c = car();
+    c.engineCc = num('t_cc'); c.year = num('t_year'); c.taxMonths = num('t_mo') || 12; c.ev = $('t_ev').checked;
+    save();
+    const y = scrollY; render(); scrollTo(0, y);
+  };
+  ['t_cc','t_year','t_mo'].forEach(id=>$(id).onchange = upd);
+  $('t_ev').onchange = upd;
 }
 
 /* ===================== Топливо ===================== */
@@ -772,6 +939,9 @@ const ACT = {
   doc: id=>docDialog(S.docs.find(d=>d.id===id)),
   newDoc: ()=>docDialog(null),
   renew: id=>renewDialog(S.docs.find(d=>d.id===id)),
+  attach: id=>attachFiles(id),
+  taxCalc: ()=>{ if(tab!=='docs'){ tab='docs'; render(); } $('taxCalc').scrollIntoView({behavior:'smooth'}); },
+  viewFile: id=>viewFile(id),
   fill: ()=>fillDialog(),
   scan: scanReceipt,
   reminders: ()=>remindersDialog(),
@@ -797,7 +967,8 @@ function itemCard(it){
       <button class="sm" data-act="record" data-id="${it.id}">Заменил</button></div>
   </div>`;
 }
-function docCard(d){
+function taxAmount(){ const c = car(); const r = transportTax({cc:c.engineCc, year:c.year, months:c.taxMonths||12, ev:c.ev}); return r ? r.total : null; }
+function docCard(d, withFiles){
   const st = docStatus(d);
   return `<div class="card item">
     <div class="item-head">
@@ -805,6 +976,8 @@ function docCard(d){
       <span class="badge b-${st.cls}">${st.label}</span>
     </div>
     ${d.expires?`<div class="bar"><i style="width:${Math.min(100,st.pct*100)}%;background:${barColor[st.cls]}"></i></div>`:''}
+    ${d.type==='tax' && taxAmount()!=null ? `<div class="small">Сумма по расчёту: <b>${tg(taxAmount())}</b> · <a href="#" data-act="taxCalc">расчёт</a></div>` : (d.type==='tax' && withFiles ? `<div class="small"><a href="#" data-act="taxCalc">Посчитать сумму налога →</a></div>` : '')}
+    ${withFiles ? filesHtml(d) : (S.files.some(f=>f.docId===d.id) ? `<div class="small muted">📎 Файлов: ${S.files.filter(f=>f.docId===d.id).length}</div>` : '')}
     <div class="row small"><span class="sp muted">${st.text}</span>
       <button class="ghost sm" data-act="doc" data-id="${d.id}">${d.expires?'Изм.':'Указать дату'}</button>
       ${d.expires?`<button class="sm" data-act="renew" data-id="${d.id}">${d.type==='tax'?'Оплатил':'Продлил'}</button>`:''}</div>
@@ -888,9 +1061,11 @@ function viewDocs(){
   const docs = carDocs().slice().sort((a,b)=>(a.expires||'9999').localeCompare(b.expires||'9999'));
   return `
   <div class="row"><h2 class="sp" style="margin:4px 0">Документы и сроки</h2><button class="ghost sm" data-act="newDoc">+ Документ</button></div>
-  <p class="small muted">Приложение напомнит заранее. Езда без действующего полиса ОГПО ВТС — это штраф, а налог на транспорт физлица платят до 1 апреля следующего года.</p>
-  <div class="list">${docs.map(docCard).join('')}</div>
-  <div class="note" style="margin-top:12px">Добавьте свои: КАСКО, доверенность, аптечка/огнетушитель (срок годности), разрешение на газ и т.п.</div>`;
+  <p class="small muted">Приложение напомнит заранее. К каждому документу можно прикрепить PDF или фото — полис, техпаспорт, права, диагностическую карту.</p>
+  <div class="list">${docs.map(d=>docCard(d, true)).join('')}</div>
+  <div class="note" style="margin-top:12px">Добавьте свои: КАСКО, доверенность, техпаспорт, аптечка/огнетушитель и т.п. Файлы хранятся только на этом телефоне. Официальные цифровые документы (права, техпаспорт) — в eGov Mobile или Kaspi; здесь — ваши копии под рукой.</div>
+  <h2 id="taxCalc" style="scroll-margin-top:80px">Налог на транспорт — калькулятор</h2>
+  ${taxCard()}`;
 }
 
 function viewFuel(){
@@ -969,6 +1144,7 @@ function viewMoney(){
 }
 
 function bindAfterRender(){
+  bindTax();
   document.querySelectorAll('[data-price]').forEach(inp=>inp.onchange = ()=>{
     S.prices[inp.dataset.price] = Number(inp.value)||0; S.pricesUpdated = today(); save(); render();
   });
