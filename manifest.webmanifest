@@ -17,6 +17,7 @@
     { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
   ],
   "shortcuts": [
+    { "name": "Чек АЗС (фото)", "url": "./?action=scan", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Добавить заправку", "url": "./?action=fill", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Записать ТО", "url": "./?action=record", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]

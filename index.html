@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1013" media="(prefers-color-scheme: dark)">
-<meta name="description" content="Учёт ТО, замены масла и жидкостей, расходников и цен на топливо в Казахстане">
+<meta name="description" content="Учёт ТО, замены масла и жидкостей, расходников, документов и цен на топливо в Казахстане">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
@@ -17,16 +17,18 @@
 <title>АвтоУчёт</title>
 <style>
 :root{
-  --bg:#f4f5f7;--card:#fff;--text:#14161a;--muted:#6b7280;--line:#e5e7eb;
-  --accent:#0f766e;--accent-soft:#ccfbf1;
+  --bg:#f4f5f7;--card:#fff;--text:#14161a;--muted:#6b7280;--line:#e5e7eb;--grid:#eceef1;
+  --accent:#0f766e;--accent-soft:#ccfbf1;--on-accent:#fff;
   --ok:#15803d;--ok-soft:#dcfce7;--warn:#b45309;--warn-soft:#fef3c7;--bad:#b91c1c;--bad-soft:#fee2e2;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;
   --shadow:0 1px 2px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --bg:#0e1013;--card:#171a1f;--text:#e8eaed;--muted:#9aa1ab;--line:#262a31;
-    --accent:#2dd4bf;--accent-soft:#123b37;
+    --bg:#0e1013;--card:#171a1f;--text:#e8eaed;--muted:#9aa1ab;--line:#262a31;--grid:#21252b;
+    --accent:#2dd4bf;--accent-soft:#123b37;--on-accent:#06201d;
     --ok:#4ade80;--ok-soft:#14301f;--warn:#fbbf24;--warn-soft:#3a2c0e;--bad:#f87171;--bad-soft:#3b1717;
+    --s1:#3987e5;--s2:#d95926;--s3:#199e70;
     --shadow:none;
   }
 }
@@ -34,22 +36,19 @@
 html,body{margin:0}
 body{background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:84px}
 header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line)}
-.toast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:728px;margin:0 auto;z-index:20;background:var(--text);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
-.toast .sp{font-size:14px}
-.toast button{flex:none}
-[hidden]{display:none!important}
 .wrap{max-width:760px;margin:0 auto}
 .top{display:flex;align-items:center;gap:10px}
-.logo{font-weight:700;font-size:18px}
+.logo{font-weight:700;font-size:18px;white-space:nowrap}
 .logo span{color:var(--accent)}
 select,input,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .top select{width:auto;flex:1;min-width:0}
-button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 14px;background:var(--accent);color:#fff;font-weight:600}
-@media (prefers-color-scheme:dark){button{color:#06201d}}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 14px;background:var(--accent);color:var(--on-accent);font-weight:600}
+button:disabled{opacity:.5;cursor:default}
 button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
 button.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
 button.sm{padding:6px 10px;font-size:13px}
+a{color:var(--accent)}
 main{padding:16px}
 h2{font-size:17px;margin:22px 0 10px}
 h2:first-child{margin-top:4px}
@@ -60,12 +59,13 @@ h2:first-child{margin-top:4px}
 .stat .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
 .row{display:flex;gap:10px;align-items:center}
 .row.wrapr{flex-wrap:wrap}
-.sp{flex:1}
+.sp{flex:1;min-width:0}
 .muted{color:var(--muted)}
 .small{font-size:13px}
 .item{display:flex;flex-direction:column;gap:8px}
 .item-head{display:flex;align-items:flex-start;gap:10px}
 .item-title{font-weight:600}
+.tag{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
 .b-ok{background:var(--ok-soft);color:var(--ok)}
 .b-warn{background:var(--warn-soft);color:var(--warn)}
@@ -77,15 +77,19 @@ h2:first-child{margin-top:4px}
 .form{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 .form .full{grid-column:1/-1}
 label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));z-index:5}
-nav .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
-nav button{background:none;color:var(--muted);font-weight:500;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px}
+label.check{display:flex;gap:8px;align-items:center;color:var(--text);font-size:14px}
+label.check input{width:auto}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:5}
+nav .wrap{display:grid;grid-template-columns:repeat(5,1fr)}
+nav button{background:none;color:var(--muted);font-weight:500;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;position:relative}
 nav button svg{width:22px;height:22px}
 nav button.on{color:var(--accent)}
+nav .dot{position:absolute;top:3px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:8px;background:var(--bad);color:#fff;font-size:10px;font-weight:700;line-height:16px;padding:0 4px}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:top}
+tr:last-child td{border-bottom:0}
 th{color:var(--muted);font-weight:500;font-size:12px}
-td.num,th.num{text-align:right}
+td.num,th.num{text-align:right;white-space:nowrap}
 .price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .price{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .price .n{font-size:13px;color:var(--muted)}
@@ -94,13 +98,44 @@ dialog{border:0;border-radius:16px;padding:0;background:var(--card);color:var(--
 dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog .dh{padding:16px 16px 0;font-weight:700;font-size:17px}
 dialog .db{padding:16px}
-dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end}
+dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .empty{text-align:center;padding:28px 16px;color:var(--muted)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:500;font-size:13px;padding:6px 10px;border-radius:999px}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
-@media (max-width:420px){.form{grid-template-columns:1fr}}
+.hint{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--text);margin-bottom:12px}
+.hint.warn{background:var(--warn-soft)}
+.banner{border-color:var(--accent);background:linear-gradient(0deg,var(--card),var(--card)) padding-box}
+.banner .q{font-weight:600;font-size:16px}
+.banner .inl{display:flex;gap:8px;margin-top:10px}
+.banner .inl input{font-size:18px;font-weight:600}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:728px;margin:0 auto;z-index:20;background:var(--text);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast .sp{font-size:14px}
+.toast button{flex:none}
+.progress{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:12px}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+/* Chart */
+.chart{position:relative;height:200px;margin:8px 0 0 44px}
+.chart .gl{position:absolute;left:0;right:0;border-top:1px solid var(--grid)}
+.chart .gl span{position:absolute;right:calc(100% + 6px);top:-8px;font-size:11px;color:var(--muted);white-space:nowrap}
+.chart .gl.base{border-top-color:var(--line)}
+.chart .cols{position:absolute;inset:0;display:flex;gap:4px;align-items:flex-end}
+.chart .col{flex:1;height:100%;display:flex;flex-direction:column-reverse;gap:2px;cursor:pointer;position:relative;min-width:0}
+.chart .col > i{display:block;width:100%;max-width:28px;margin:0 auto;flex:none}
+.chart .col > i.top{border-radius:4px 4px 0 0}
+.chart .col:hover > i,.chart .col.sel > i{filter:brightness(1.08)}
+.chart .col.sel::after{content:"";position:absolute;inset:0 -2px;background:var(--text);opacity:.05;border-radius:4px;pointer-events:none}
+.chart-x{display:flex;gap:4px;margin:6px 0 0 44px}
+.chart-x span{flex:1;text-align:center;font-size:11px;color:var(--muted);min-width:0;overflow:hidden}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-right:6px;vertical-align:-1px}
+.tip{position:absolute;z-index:3;top:0;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.15);pointer-events:none;white-space:nowrap;min-width:150px}
+.tip b{font-size:13px}
+.tip .r{display:flex;gap:10px;justify-content:space-between}
+.tip .r span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--c);margin-right:6px}
+[hidden]{display:none!important}
+@media (max-width:420px){.form{grid-template-columns:1fr}.chart,.chart-x{margin-left:38px}.chart-x span:nth-child(odd){visibility:hidden}}
 </style>
 </head>
 <body>
@@ -109,7 +144,7 @@ dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end}
     <div class="logo">Авто<span>Учёт</span></div>
     <select id="carSel" aria-label="Автомобиль"></select>
     <button class="sm" id="installBtn" hidden>Установить</button>
-    <button class="ghost sm" id="carEditBtn" title="Автомобиль">⚙︎</button>
+    <button class="ghost sm" id="carEditBtn" title="Автомобиль и настройки" aria-label="Настройки">⚙︎</button>
   </div>
 </header>
 
@@ -119,8 +154,9 @@ dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end}
   <div class="wrap">
     <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Обзор</button>
     <button data-tab="service"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>ТО</button>
-    <button data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>История</button>
+    <button data-tab="docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>Документы</button>
     <button data-tab="fuel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M14 9h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8l-3-3M7 8h4"/></svg>Топливо</button>
+    <button data-tab="money"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Расходы</button>
   </div>
 </nav>
 
@@ -129,7 +165,7 @@ dialog .df{padding:0 16px 16px;display:flex;gap:8px;justify-content:flex-end}
 <dialog id="dlg"><form method="dialog" id="dlgForm"><div class="dh" id="dlgTitle"></div><div class="db" id="dlgBody"></div><div class="df" id="dlgFoot"></div></form></dialog>
 
 <script>
-/* ===================== Данные ===================== */
+/* ===================== Справочники ===================== */
 const KEY = 'avtouchet.v1';
 const FUELS = [
   {id:'ai92', name:'АИ-92'},
@@ -158,62 +194,158 @@ const TEMPLATE = [
 ];
 const CATS = ['Масла','Жидкости','Фильтры','Расходники','Другое'];
 
+// Документы: period — на сколько месяцев продлевается; tax — срок до 1 апреля следующего года
+const DOC_TEMPLATE = [
+  {type:'ogpo',    name:'Страховка ОГПО ВТС',          period:12,  remind:30},
+  {type:'inspect', name:'Техосмотр',                   period:12,  remind:30},
+  {type:'tax',     name:'Налог на транспорт',          period:12,  remind:30},
+  {type:'license', name:'Водительское удостоверение',  period:120, remind:60},
+];
+// Серии расходов (порядок фиксирован; цвета — категориальные слоты 1–3)
+const SERIES = [
+  {id:'fuel',    name:'Топливо',              c:'var(--s1)'},
+  {id:'service', name:'ТО и ремонт',          c:'var(--s2)'},
+  {id:'doc',     name:'Документы и налоги',   c:'var(--s3)'},
+];
+
+/* ===================== Даты ===================== */
+const pad = n => String(n).padStart(2,'0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;   // локальная дата, не UTC
+const parseD = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const today = () => iso(new Date());
+const todayD = () => parseD(today());
+const daysBetween = (a,b) => Math.round((b-a)/86400000);
+const daysUntil = s => daysBetween(todayD(), parseD(s));
+const addDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate()+Math.round(n)); return iso(d); };
+const addMonths = (s, m) => { const d = parseD(s), day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+m); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate())); return iso(d); };
+const nextApril1 = (after) => { const d = parseD(after||today()); let y = d.getFullYear(); if(iso(d) >= `${y}-04-01`) y++; return `${y}-04-01`; };
+const dstr = d => d ? parseD(d).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}) : '—';
+function humanDays(n){ n = Math.round(n); if(n<=0) return 'сегодня'; if(n<14) return `${n} ${plural(n,'день','дня','дней')}`; if(n<60) return `${Math.round(n/7)} нед.`; return `${Math.round(n/30.4)} мес.`; }
+
+/* ===================== Состояние ===================== */
 const uid = () => Math.random().toString(36).slice(2,10);
-const today = () => new Date().toISOString().slice(0,10);
+const itemsFromTemplate = carId => TEMPLATE.map(t=>({id:uid(), carId, name:t.name, cat:t.cat, intervalKm:t.km, intervalMo:t.mo, lastKm:null, lastDate:null}));
+const docsFromTemplate = carId => DOC_TEMPLATE.map(t=>({id:uid(), carId, type:t.type, name:t.name, period:t.period, remind:t.remind, expires: t.type==='tax' ? nextApril1() : null, note:''}));
 
 function freshState(){
   const carId = uid();
   return {
-    cars:[{id:carId, name:'Мой автомобиль', mileage:0, fuel:'ai92', consumption:8}],
+    cars:[{id:carId, name:'Мой автомобиль', mileage:0, mileageDate:null, fuel:'ai92', consumption:8}],
     activeCarId: carId,
-    items: TEMPLATE.map(t=>({id:uid(), carId, name:t.name, cat:t.cat, intervalKm:t.km, intervalMo:t.mo, lastKm:null, lastDate:null})),
-    records: [],
-    fillups: [],
-    prices: {...DEFAULT_PRICES},
-    pricesUpdated: null,
+    items: itemsFromTemplate(carId),
+    docs: docsFromTemplate(carId),
+    records: [], fillups: [], mileageLog: [],
+    prices: {...DEFAULT_PRICES}, pricesUpdated: null,
+    settings: {notify:false},
   };
+}
+function migrate(s){
+  s.items ||= []; s.records ||= []; s.fillups ||= []; s.mileageLog ||= []; s.settings ||= {notify:false};
+  s.prices ||= {...DEFAULT_PRICES};
+  if(!s.docs){ s.docs = []; s.cars.forEach(c=>s.docs.push(...docsFromTemplate(c.id))); }
+  s.records.forEach(r=>{ if(!r.kind) r.kind = r.itemId ? 'service' : 'other'; });
+  s.cars.forEach(c=>{
+    if(c.mileageDate===undefined) c.mileageDate = null;
+    if(c.mileage>0 && !s.mileageLog.some(m=>m.carId===c.id)) s.mileageLog.push({carId:c.id, date:today(), km:c.mileage});
+    if(c.mileage>0 && !c.mileageDate) c.mileageDate = today();
+  });
+  return s;
 }
 let S;
 function load(){
-  try{ const raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : freshState(); }
+  try{ const raw = localStorage.getItem(KEY); S = raw ? migrate(JSON.parse(raw)) : freshState(); }
   catch(e){ S = freshState(); }
 }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} syncReminders(); }
 
 /* ===================== Утилиты ===================== */
 const fmt = n => (n==null||isNaN(n)) ? '—' : Math.round(n).toLocaleString('ru-RU');
 const fmt1 = n => (n==null||isNaN(n)) ? '—' : (Math.round(n*10)/10).toLocaleString('ru-RU');
 const tg = n => fmt(n) + ' ₸';
-const dstr = d => d ? new Date(d+'T00:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}) : '—';
+const tgShort = n => n>=1e6 ? fmt1(n/1e6)+' млн' : n>=1e3 ? fmt(n/1e3)+' тыс' : fmt(n);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function plural(n,a,b,c){ n=Math.abs(n)%100; const m=n%10; return n>10&&n<20?c:m>1&&m<5?b:m===1?a:c; }
 const car = () => S.cars.find(c=>c.id===S.activeCarId) || S.cars[0];
 const carItems = () => S.items.filter(i=>i.carId===car().id);
+const carDocs = () => S.docs.filter(d=>d.carId===car().id);
 const carRecords = () => S.records.filter(r=>r.carId===car().id).sort((a,b)=>b.date.localeCompare(a.date)||b.km-a.km);
 const carFillups = () => S.fillups.filter(f=>f.carId===car().id).sort((a,b)=>a.date.localeCompare(b.date)||a.km-b.km);
-function addMonths(d, m){ const x=new Date(d+'T00:00:00'); x.setMonth(x.getMonth()+m); return x; }
-function daysBetween(a,b){ return Math.round((b-a)/86400000); }
 
+/* ===================== Пробег: учёт и оценка ===================== */
+function setMileage(km, date, allowDown){
+  if(km==null || isNaN(km)) return;
+  const c = car(); date = date || today();
+  S.mileageLog.push({carId:c.id, date, km});
+  if(allowDown || km >= c.mileage){ c.mileage = km; if(!c.mileageDate || date >= c.mileageDate) c.mileageDate = date; }
+  else if(date >= (c.mileageDate||'')) { /* более старая/меньшая запись — не трогаем текущий пробег */ }
+}
+// Средний пробег в день по всем известным точкам (журнал, заправки, ТО) за последний год
+function kmPerDay(carId){
+  carId = carId || car().id;
+  const pts = [
+    ...S.mileageLog.filter(m=>m.carId===carId),
+    ...S.fillups.filter(f=>f.carId===carId),
+    ...S.records.filter(r=>r.carId===carId && r.km),
+  ].filter(p=>p.km>0 && p.date).map(p=>({d:p.date, km:p.km})).sort((a,b)=>a.d.localeCompare(b.d));
+  if(pts.length<2) return null;
+  const last = pts[pts.length-1], from = addDays(last.d, -365);
+  const win = pts.filter(p=>p.d>=from);
+  const first = win[0], maxKm = Math.max(...win.map(p=>p.km));
+  const span = daysBetween(parseD(first.d), parseD(last.d));
+  if(span < 10 || maxKm <= first.km) return null;
+  const r = (maxKm - first.km)/span;
+  return r>0 && r<1500 ? r : null;
+}
+function estMileage(c){
+  c = c || car();
+  const r = kmPerDay(c.id);
+  if(!r || !c.mileageDate) return c.mileage;
+  return c.mileage + Math.max(0, Math.round(r * daysBetween(parseD(c.mileageDate), todayD())));
+}
+const mileageAge = (c=car()) => c.mileageDate ? daysBetween(parseD(c.mileageDate), todayD()) : null;
+const mileageStale = (c=car()) => !c.mileage || mileageAge(c)==null || mileageAge(c) >= 7;
+
+/* ===================== Статусы ===================== */
 function status(it){
-  const c = car();
-  if(it.lastKm==null && !it.lastDate) return {cls:'none', label:'Нет данных', pct:0, text:'Отметьте последнюю замену'};
-  let pct = 0, parts = [];
+  if(it.lastKm==null && !it.lastDate) return {cls:'none', label:'Нет данных', pct:0, text:'Отметьте последнюю замену', due:null};
+  const now = estMileage(), rate = kmPerDay();
+  let pct = 0, parts = [], dues = [];
   if(it.intervalKm && it.lastKm!=null){
-    const used = c.mileage - it.lastKm, left = it.intervalKm - used;
+    const used = now - it.lastKm, left = it.intervalKm - used;
     pct = Math.max(pct, used/it.intervalKm);
-    parts.push(left>=0 ? `через ${fmt(left)} км` : `просрочено на ${fmt(-left)} км`);
+    if(left>=0){
+      parts.push(`через ${fmt(left)} км` + (rate ? ` (~${humanDays(left/rate)})` : ''));
+      if(rate) dues.push(addDays(today(), left/rate));
+    } else { parts.push(`просрочено на ${fmt(-left)} км`); dues.push(today()); }
   }
   if(it.intervalMo && it.lastDate){
-    const due = addMonths(it.lastDate, it.intervalMo), now = new Date();
-    const total = daysBetween(new Date(it.lastDate+'T00:00:00'), due);
-    const left = daysBetween(now, due);
+    const due = addMonths(it.lastDate, it.intervalMo);
+    const total = daysBetween(parseD(it.lastDate), parseD(due)), left = daysUntil(due);
     pct = Math.max(pct, (total-left)/total);
-    parts.push(left>=0 ? `до ${due.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'})}` : `просрочено на ${fmt(-left)} дн.`);
+    parts.push(left>=0 ? `до ${dstr(due)}` : `просрочено на ${fmt(-left)} дн.`);
+    dues.push(due);
   }
   const cls = pct>=1 ? 'bad' : pct>=0.85 ? 'warn' : 'ok';
   const label = cls==='bad' ? 'Пора менять' : cls==='warn' ? 'Скоро' : 'В норме';
-  return {cls, label, pct, text: parts.join(' · ') || 'Интервал не задан'};
+  return {cls, label, pct, text: parts.join(' · ') || 'Интервал не задан', due: dues.sort()[0] || null};
+}
+function docStatus(d){
+  if(!d.expires) return {cls:'none', label:'Нет даты', pct:0, text:'Укажите, до какого числа действует', left:null};
+  const left = daysUntil(d.expires);
+  const total = (d.period||12)*30.4;
+  const pct = Math.min(1.2, Math.max(0, 1 - left/total));
+  const isTax = d.type==='tax';
+  if(left<0) return {cls:'bad', label: isTax?'Не оплачен':'Просрочено', pct:1, left, text:`${isTax?'срок уплаты прошёл':'истекло'} ${fmt(-left)} дн. назад`};
+  if(left<=d.remind) return {cls: left<=7?'bad':'warn', label: left===0?'Сегодня':`${left} дн.`, pct, left, text:`${isTax?'оплатить до':'действует до'} ${dstr(d.expires)} · осталось ${humanDays(left)}`};
+  return {cls:'ok', label:'Действует', pct, left, text:`${isTax?'оплатить до':'до'} ${dstr(d.expires)} · ${humanDays(left)}`};
 }
 const barColor = {ok:'var(--ok)', warn:'var(--warn)', bad:'var(--bad)', none:'var(--line)'};
+function attention(){
+  const a = [];
+  carItems().forEach(i=>{ const s=status(i); if(s.cls==='bad'||s.cls==='warn') a.push({kind:'item', o:i, s, w:s.pct + (s.cls==='bad'?10:0)}); });
+  carDocs().forEach(d=>{ const s=docStatus(d); if(s.cls==='bad'||s.cls==='warn') a.push({kind:'doc', o:d, s, w:(s.cls==='bad'?20:5) - (s.left||0)/100}); });
+  return a.sort((x,y)=>y.w-x.w);
+}
 
 /* ===================== Диалоги ===================== */
 const dlg = document.getElementById('dlg');
@@ -224,19 +356,30 @@ function openDialog(title, body, buttons){
   buttons.forEach(b=>{
     const el = document.createElement('button');
     el.type = b.submit ? 'submit' : 'button';
-    el.textContent = b.text; if(b.cls) el.className = b.cls;
+    el.textContent = b.text; if(b.cls) el.className = b.cls; if(b.id) el.id = b.id;
     el.onclick = (e)=>{
       if(b.submit){ const f=document.getElementById('dlgForm'); if(!f.reportValidity()){e.preventDefault();return;} }
+      e.preventDefault();
       const r = b.onClick ? b.onClick() : null;
-      if(r===false){ e.preventDefault(); return; }
+      if(r===false) return;
       dlg.close();
     };
     foot.appendChild(el);
   });
-  dlg.showModal();
+  if(!dlg.open) dlg.showModal();
 }
-const val = id => document.getElementById(id).value;
-const num = id => { const v = document.getElementById(id).value; return v==='' ? null : Number(v); };
+const $ = id => document.getElementById(id);
+const val = id => $(id).value;
+const num = id => { const v = $(id).value; return v==='' ? null : Number(v); };
+function toast(text, btnText, onBtn, ms){
+  const t = $('toast');
+  $('toastText').textContent = text;
+  const b = $('toastBtn');
+  b.hidden = !btnText; b.textContent = btnText||''; b.onclick = ()=>{ t.hidden = true; onBtn && onBtn(); };
+  $('toastClose').onclick = ()=>{ t.hidden = true; };
+  t.hidden = false;
+  clearTimeout(toast._t); if(ms) toast._t = setTimeout(()=>t.hidden=true, ms);
+}
 
 /* ===================== Автомобиль ===================== */
 function carDialog(isNew){
@@ -249,7 +392,8 @@ function carDialog(isNew){
       <label class="full">Топливо<select id="f_fuel">${FUELS.map(f=>`<option value="${f.id}" ${f.id===c.fuel?'selected':''}>${f.name}</option>`).join('')}</select></label>
     </div>
     ${isNew?'':`<div class="row wrapr" style="margin-top:14px">
-      <button type="button" class="ghost sm" id="newCarBtn">+ Добавить ещё авто</button>
+      <button type="button" class="ghost sm" id="remBtn">🔔 Напоминания</button>
+      <button type="button" class="ghost sm" id="newCarBtn">+ Ещё авто</button>
       <button type="button" class="ghost sm" id="expBtn">Экспорт</button>
       <button type="button" class="ghost sm" id="impBtn">Импорт</button>
       ${S.cars.length>1?'<button type="button" class="danger sm" id="delCarBtn">Удалить авто</button>':''}
@@ -257,52 +401,62 @@ function carDialog(isNew){
   `, [
     {text:'Отмена', cls:'ghost'},
     {text:'Сохранить', submit:true, onClick:()=>{
-      const data = {name:val('f_name').trim(), mileage:num('f_mil')||0, consumption:num('f_cons')||0, fuel:val('f_fuel')};
+      const data = {name:val('f_name').trim(), consumption:num('f_cons')||0, fuel:val('f_fuel')};
+      const km = num('f_mil')||0;
       if(isNew){
         const id = uid();
-        S.cars.push({id, ...data});
-        TEMPLATE.forEach(t=>S.items.push({id:uid(), carId:id, name:t.name, cat:t.cat, intervalKm:t.km, intervalMo:t.mo, lastKm:null, lastDate:null}));
+        S.cars.push({id, ...data, mileage:0, mileageDate:null});
+        S.items.push(...itemsFromTemplate(id)); S.docs.push(...docsFromTemplate(id));
         S.activeCarId = id;
-      } else Object.assign(car(), data);
+        if(km) setMileage(km, today(), true);
+      } else {
+        Object.assign(car(), data);
+        if(km !== car().mileage) setMileage(km, today(), true);
+      }
       save(); render();
     }},
   ]);
   if(!isNew){
-    document.getElementById('newCarBtn').onclick = ()=>{ dlg.close(); carDialog(true); };
-    document.getElementById('expBtn').onclick = exportData;
-    document.getElementById('impBtn').onclick = importData;
-    const del = document.getElementById('delCarBtn');
+    $('remBtn').onclick = remindersDialog;
+    $('newCarBtn').onclick = ()=>carDialog(true);
+    $('expBtn').onclick = exportData;
+    $('impBtn').onclick = importData;
+    const del = $('delCarBtn');
     if(del) del.onclick = ()=>{
       if(!confirm(`Удалить «${car().name}» со всей историей?`)) return;
       const id = car().id;
       S.cars = S.cars.filter(c=>c.id!==id);
-      S.items = S.items.filter(i=>i.carId!==id);
-      S.records = S.records.filter(r=>r.carId!==id);
-      S.fillups = S.fillups.filter(f=>f.carId!==id);
+      ['items','records','fillups','docs','mileageLog'].forEach(k=>S[k] = S[k].filter(x=>x.carId!==id));
       S.activeCarId = S.cars[0].id; save(); dlg.close(); render();
     };
   }
 }
 function mileageDialog(){
-  openDialog('Обновить пробег', `<label>Пробег сейчас, км<input id="f_mil" type="number" min="0" inputmode="numeric" required value="${car().mileage}"></label>`,
-    [{text:'Отмена',cls:'ghost'},{text:'Сохранить',submit:true,onClick:()=>{ car().mileage = num('f_mil')||0; save(); render(); }}]);
-  setTimeout(()=>{const i=document.getElementById('f_mil'); i.select();},50);
+  const est = estMileage();
+  openDialog('Какой сейчас пробег?', `
+    <label>Пробег по одометру, км<input id="f_mil" type="number" min="0" inputmode="numeric" required value="${est||''}"></label>
+    ${est!==car().mileage?`<div class="note">Подставлена оценка по вашему среднему пробегу. Последний раз вы вводили ${fmt(car().mileage)} км (${dstr(car().mileageDate)}).</div>`:''}`,
+    [{text:'Отмена',cls:'ghost'},{text:'Сохранить',submit:true,onClick:()=>{ setMileage(num('f_mil')||0, today(), true); save(); render(); toast('Пробег обновлён', null, null, 2000); }}]);
+  setTimeout(()=>{ const i=$('f_mil'); i && i.select(); },50);
 }
 function exportData(){
   const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `avtouchet-${today()}.json`; a.click();
+  download(blob, `avtouchet-${today()}.json`);
+}
+function download(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
 }
 function importData(){
-  const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json,.json';
   inp.onchange = async ()=>{
-    try{ const d = JSON.parse(await inp.files[0].text()); if(!d.cars||!d.items) throw 0; S=d; save(); dlg.close(); render(); }
+    try{ const d = JSON.parse(await inp.files[0].text()); if(!d.cars||!d.items) throw 0; S=migrate(d); save(); dlg.close(); render(); toast('Данные загружены', null, null, 2500); }
     catch(e){ alert('Не удалось прочитать файл'); }
   };
   inp.click();
 }
 
-/* ===================== ТО: позиции и записи ===================== */
+/* ===================== ТО ===================== */
 function itemDialog(it){
   const isNew = !it; it = it || {name:'', cat:'Расходники', intervalKm:'', intervalMo:'', lastKm:'', lastDate:''};
   openDialog(isNew?'Новая позиция ТО':'Позиция ТО', `
@@ -320,18 +474,19 @@ function itemDialog(it){
     {text:'Сохранить',submit:true,onClick:()=>{
       const d = {name:val('f_name').trim(), cat:val('f_cat'), intervalKm:num('f_ikm')||0, intervalMo:num('f_imo')||0, lastKm:num('f_lkm'), lastDate:val('f_ld')||null};
       if(isNew) S.items.push({id:uid(), carId:car().id, ...d}); else Object.assign(it,d);
+      if(d.lastKm>car().mileage) setMileage(d.lastKm, d.lastDate||today());
       save(); render();
     }},
   ]);
 }
 function recordDialog(preItemId){
   const items = carItems();
-  openDialog('Записать обслуживание', `
+  openDialog('Записать обслуживание / расход', `
     <div class="form">
-      <label class="full">Что сделано<select id="f_item">${items.map(i=>`<option value="${i.id}" ${i.id===preItemId?'selected':''}>${esc(i.name)}</option>`).join('')}<option value="">Другое (разовая работа)</option></select></label>
+      <label class="full">Что сделано<select id="f_item">${items.map(i=>`<option value="${i.id}" ${i.id===preItemId?'selected':''}>${esc(i.name)}</option>`).join('')}<option value="" ${preItemId===''?'selected':''}>Другое: ремонт, мойка, штраф, парковка…</option></select></label>
       <label class="full" id="otherWrap" style="display:none">Описание<input id="f_other" placeholder="Например: развал-схождение"></label>
       <label>Дата<input id="f_date" type="date" required value="${today()}"></label>
-      <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" required value="${car().mileage||''}"></label>
+      <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" value="${estMileage()||''}"></label>
       <label>Стоимость, ₸<input id="f_cost" type="number" min="0" inputmode="numeric" placeholder="запчасти + работа"></label>
       <label>Где / заметка<input id="f_note" placeholder="СТО, бренд масла…"></label>
     </div>`,
@@ -339,17 +494,18 @@ function recordDialog(preItemId){
     {text:'Отмена',cls:'ghost'},
     {text:'Сохранить',submit:true,onClick:()=>{
       const itemId = val('f_item') || null, km = num('f_km'), date = val('f_date');
-      S.records.push({id:uid(), carId:car().id, itemId, title: itemId ? null : (val('f_other').trim()||'Работа'), date, km, cost:num('f_cost')||0, note:val('f_note').trim()});
+      if(itemId && km==null){ alert('Укажите пробег — он нужен для расчёта следующей замены'); return false; }
+      S.records.push({id:uid(), carId:car().id, kind: itemId?'service':'other', itemId, title: itemId ? null : (val('f_other').trim()||'Расход'), date, km, cost:num('f_cost')||0, note:val('f_note').trim()});
       if(itemId){
         const it = S.items.find(i=>i.id===itemId);
         if(it.lastDate==null || date >= it.lastDate){ it.lastDate = date; it.lastKm = km; }
       }
-      if(km > car().mileage) car().mileage = km;
+      if(km) setMileage(km, date);
       save(); render();
     }},
   ]);
-  const sel = document.getElementById('f_item');
-  const sync = ()=> document.getElementById('otherWrap').style.display = sel.value ? 'none' : '';
+  const sel = $('f_item');
+  const sync = ()=> $('otherWrap').style.display = sel.value ? 'none' : '';
   sel.onchange = sync; sync();
 }
 function recalcItem(itemId){
@@ -358,33 +514,82 @@ function recalcItem(itemId){
   if(recs[0]){ it.lastDate = recs[0].date; it.lastKm = recs[0].km; }
 }
 
-/* ===================== Топливо ===================== */
-function fillDialog(){
-  const c = car();
-  openDialog('Заправка', `
+/* ===================== Документы ===================== */
+function docDialog(d){
+  const isNew = !d; d = d || {name:'', period:12, remind:30, expires:'', note:'', type:'custom'};
+  openDialog(isNew?'Новый документ':d.name, `
     <div class="form">
-      <label>Дата<input id="f_date" type="date" required value="${today()}"></label>
-      <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" required value="${c.mileage||''}"></label>
-      <label>Топливо<select id="f_fuel">${FUELS.map(f=>`<option value="${f.id}" ${f.id===c.fuel?'selected':''}>${f.name}</option>`).join('')}</select></label>
-      <label>Цена, ₸/л<input id="f_price" type="number" step="0.01" min="0" required value="${S.prices[c.fuel]}"></label>
-      <label>Литров<input id="f_l" type="number" step="0.01" min="0" required></label>
-      <label>Сумма, ₸<input id="f_sum" type="number" min="0"></label>
-      <label class="full" style="flex-direction:row;display:flex;gap:8px;align-items:center;color:var(--text)"><input id="f_full" type="checkbox" checked style="width:auto"> Полный бак (для расчёта расхода)</label>
+      <label class="full">Название<input id="f_name" required value="${esc(d.name)}" placeholder="Например: Доверенность, КАСКО"></label>
+      <label class="full">${d.type==='tax'?'Оплатить до':'Действует до'}<input id="f_exp" type="date" value="${d.expires||''}"></label>
+      <label>Напомнить за, дней<input id="f_rem" type="number" min="0" value="${d.remind}"></label>
+      <label>Продлевается на, мес.<input id="f_per" type="number" min="1" value="${d.period}"></label>
+      <label class="full">Заметка<input id="f_note" value="${esc(d.note)}" placeholder="Номер полиса, страховая компания…"></label>
+    </div>
+    ${d.type==='tax'?'<div class="note">Физлица платят налог на транспорт за год до 1 апреля следующего года. Проверить задолженность можно в eGov или в приложении банка.</div>':''}`,
+  [
+    ...(isNew?[]:[{text:'Удалить',cls:'danger',onClick:()=>{ if(!confirm('Удалить документ?')) return false; S.docs=S.docs.filter(x=>x.id!==d.id); save(); render(); }}]),
+    {text:'Отмена',cls:'ghost'},
+    {text:'Сохранить',submit:true,onClick:()=>{
+      const v = {name:val('f_name').trim(), expires:val('f_exp')||null, remind:num('f_rem')??30, period:num('f_per')||12, note:val('f_note').trim()};
+      if(isNew) S.docs.push({id:uid(), carId:car().id, type:'custom', ...v}); else Object.assign(d, v);
+      save(); render();
+    }},
+  ]);
+}
+function renewDialog(d){
+  const isTax = d.type==='tax';
+  const base = d.expires && d.expires > today() ? d.expires : today();
+  const next = isTax ? nextApril1(d.expires && d.expires>=today() ? d.expires : today()) : addMonths(base, d.period||12);
+  openDialog(isTax ? 'Налог оплачен' : `Продлить: ${d.name}`, `
+    <div class="form">
+      <label>Дата оплаты<input id="f_date" type="date" required value="${today()}"></label>
+      <label>Стоимость, ₸<input id="f_cost" type="number" min="0" inputmode="numeric"></label>
+      <label class="full">${isTax?'Следующий срок уплаты':'Новая дата окончания'}<input id="f_exp" type="date" required value="${next}"></label>
     </div>`,
   [
     {text:'Отмена',cls:'ghost'},
     {text:'Сохранить',submit:true,onClick:()=>{
-      const km = num('f_km');
-      S.fillups.push({id:uid(), carId:c.id, date:val('f_date'), km, fuel:val('f_fuel'), price:num('f_price'), liters:num('f_l'), full:document.getElementById('f_full').checked});
-      if(km > c.mileage) c.mileage = km;
-      save(); render();
+      d.expires = val('f_exp');
+      const cost = num('f_cost')||0;
+      S.records.push({id:uid(), carId:car().id, kind:'doc', docId:d.id, title:d.name, date:val('f_date'), km:null, cost, note:''});
+      save(); render(); toast(`${d.name}: следующий срок ${dstr(d.expires)}`, null, null, 3000);
     }},
   ]);
-  const p=document.getElementById('f_price'), l=document.getElementById('f_l'), s=document.getElementById('f_sum'), fu=document.getElementById('f_fuel');
+}
+
+/* ===================== Топливо ===================== */
+function fillDialog(pre){
+  pre = pre || {};
+  const c = car(), fuel = pre.fuel || c.fuel;
+  openDialog('Заправка', `
+    ${pre.note?`<div class="hint ${pre.noteWarn?'warn':''}">${pre.note}</div>`:''}
+    <div class="row" style="margin-bottom:12px"><button type="button" class="ghost sm" id="scanInDlg">📷 Заполнить по фото чека</button></div>
+    <div class="form">
+      <label>Дата<input id="f_date" type="date" required value="${pre.date||today()}"></label>
+      <label>Пробег, км<input id="f_km" type="number" min="0" inputmode="numeric" required value="${estMileage()||''}"></label>
+      <label>Топливо<select id="f_fuel">${FUELS.map(f=>`<option value="${f.id}" ${f.id===fuel?'selected':''}>${f.name}</option>`).join('')}</select></label>
+      <label>Цена, ₸/л<input id="f_price" type="number" step="0.01" min="0" required value="${pre.price ?? S.prices[fuel]}"></label>
+      <label>Литров<input id="f_l" type="number" step="0.01" min="0" required value="${pre.liters ?? ''}"></label>
+      <label>Сумма, ₸<input id="f_sum" type="number" step="0.01" min="0" value="${pre.total ?? ''}"></label>
+      <label class="check full"><input id="f_full" type="checkbox" checked> Полный бак (для расчёта расхода)</label>
+    </div>`,
+  [
+    {text:'Отмена',cls:'ghost'},
+    {text:'Сохранить',submit:true,onClick:()=>{
+      const km = num('f_km'), date = val('f_date');
+      S.fillups.push({id:uid(), carId:c.id, date, km, fuel:val('f_fuel'), price:num('f_price'), liters:num('f_l'), full:$('f_full').checked});
+      setMileage(km, date);
+      save(); render(); toast('Заправка сохранена', null, null, 2000);
+    }},
+  ]);
+  const p=$('f_price'), l=$('f_l'), s=$('f_sum'), fu=$('f_fuel');
   l.oninput = ()=>{ if(p.value&&l.value) s.value = Math.round(p.value*l.value); };
   s.oninput = ()=>{ if(p.value&&s.value) l.value = (s.value/p.value).toFixed(2); };
-  p.oninput = l.oninput;
+  p.oninput = ()=>{ if(s.value && !l.value) s.oninput(); else l.oninput(); };
   fu.onchange = ()=>{ p.value = S.prices[fu.value]; l.oninput(); };
+  $('scanInDlg').onclick = scanReceipt;
+  if(!pre.liters && !pre.total) setTimeout(()=>$('f_km').select(), 50);
+  else setTimeout(()=>$('f_km').focus(), 50);
 }
 function fuelStats(){
   const f = carFillups();
@@ -402,28 +607,175 @@ function fuelStats(){
   return {avg, segs: Object.fromEntries(segs.map(s=>[s.id,s.per100]))};
 }
 
+/* ===================== Распознавание чека ===================== */
+let ocrWorker = null;
+function loadScript(src){ return new Promise((ok,fail)=>{ const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=()=>fail(new Error('load')); document.head.appendChild(s); }); }
+async function getOcr(onProgress){
+  if(ocrWorker) return ocrWorker;
+  if(!window.Tesseract) await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+  ocrWorker = await Tesseract.createWorker(['rus','eng'], 1, { logger: m => onProgress && onProgress(m) });
+  return ocrWorker;
+}
+async function prepareImage(file){
+  let bmp;
+  try{ bmp = await createImageBitmap(file, {imageOrientation:'from-image'}); }
+  catch(e){ bmp = await new Promise((ok,fail)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=fail; i.src=URL.createObjectURL(file); }); }
+  const w = bmp.width, h = bmp.height, k = Math.min(1, 2000/Math.max(w,h));
+  const cv = document.createElement('canvas'); cv.width = Math.round(w*k); cv.height = Math.round(h*k);
+  const x = cv.getContext('2d'); x.drawImage(bmp, 0, 0, cv.width, cv.height);
+  // оттенки серого + растяжение контраста — чеки часто бледные
+  const d = x.getImageData(0,0,cv.width,cv.height), p = d.data;
+  let mn=255, mx=0;
+  for(let i=0;i<p.length;i+=4){ const g = p[i]*.299+p[i+1]*.587+p[i+2]*.114; p[i]=g; if(g<mn)mn=g; if(g>mx)mx=g; }
+  const r = mx-mn || 1;
+  for(let i=0;i<p.length;i+=4){ const g = Math.max(0, Math.min(255, (p[i]-mn)*255/r)); p[i]=p[i+1]=p[i+2]=g; }
+  x.putImageData(d,0,0);
+  return cv;
+}
+// Разбор текста чека АЗС: литры, цена за литр, итог, вид топлива, дата
+function parseReceipt(raw){
+  const t = raw.replace(/\r/g,'');
+  const lines = t.split('\n').map(s=>s.trim()).filter(Boolean);
+  const N = s => { if(s==null) return null; const v = parseFloat(String(s).replace(/[\s\u00a0]/g,'').replace(',','.')); return isNaN(v)?null:v; };
+  const NUM = '(\\d{1,3}(?:[ \\u00a0]\\d{3})+(?:[.,]\\d{1,2})?|\\d+(?:[.,]\\d{1,3})?)';
+  const numsIn = s => [...s.matchAll(new RegExp(NUM,'g'))].map(m=>N(m[1])).filter(v=>v!=null);
+  const isL = v => v>0.5 && v<=250, isP = v => v>=60 && v<=900;
+  let fuel=null, liters=null, price=null, total=null, date=null;
+  const up = t.toUpperCase();
+  const fm = up.match(/(?:АИ|AI|A1|АЙ|A\s?И)\s*[-–—]?\s*(92|95|98|100)/);
+  if(fm) fuel = fm[1]==='92'?'ai92':fm[1]==='95'?'ai95':'ai98';
+  else if(/(^|[^А-ЯA-Z])(ДТ|DT)([^А-ЯA-Z]|$)|ДИЗЕЛ|DIESEL/.test(up)) fuel='dt';
+  else if(/ПРОПАН|LPG|СУГ|(^|\s)ГАЗ(\s|$)/.test(up)) fuel='gas';
+  // «40,00 x 205,00» или «40.00 л * 205»
+  for(const l of lines){
+    const m = l.match(new RegExp(NUM+'\\s*(?:л|l|литр\\S*|ltr)?\\.?\\s*[xXхХ*×]\\s*'+NUM));
+    if(m){ const a=N(m[1]), b=N(m[2]);
+      if(isL(a)&&isP(b)){ liters=a; price=b; break; }
+      if(isL(b)&&isP(a)){ liters=b; price=a; break; } }
+  }
+  if(liters==null){
+    for(const l of lines){ const m = l.match(new RegExp(NUM+'\\s*(?:л|l|литр|ltr)(?![а-яa-z])','i')); if(m && isL(N(m[1]))){ liters=N(m[1]); break; } }
+  }
+  if(liters==null){
+    for(const l of lines){ if(/кол-?во|количество|объ[её]м|саны|qty|литр/i.test(l)){ const v = numsIn(l).filter(isL); if(v.length){ liters=v[v.length-1]; break; } } }
+  }
+  if(price==null){
+    for(const l of lines){ if(/цена|баға|бағасы|price|₸\s*\/\s*л|тг\s*\/\s*л/i.test(l)){ const v = numsIn(l).filter(isP); if(v.length){ price=v[v.length-1]; break; } } }
+  }
+  const totals = [];
+  lines.forEach((l,i)=>{
+    if(/итог|итого|всего|сумма|к оплате|оплачено|барлығы|жиыны|төлеу|total|безнал|наличн/i.test(l)){
+      let v = numsIn(l).filter(x=>x>=100);
+      if(!v.length && lines[i+1]) v = numsIn(lines[i+1]).filter(x=>x>=100);
+      totals.push(...v);
+    }
+  });
+  if(totals.length){
+    // предпочитаем сумму, совпадающую с литры×цена; иначе самую частую/большую
+    if(liters&&price){ const exp = liters*price; total = totals.reduce((b,x)=>Math.abs(x-exp)<Math.abs(b-exp)?x:b, totals[0]); }
+    else { const cnt = {}; totals.forEach(x=>cnt[x]=(cnt[x]||0)+1); total = totals.sort((a,b)=>(cnt[b]-cnt[a])||(b-a))[0]; }
+  }
+  const dm = t.match(/(\d{2})[.\/-](\d{2})[.\/-](\d{4}|\d{2})(?!\d)/);
+  if(dm){ const y = dm[3].length===2 ? '20'+dm[3] : dm[3]; const s = `${y}-${dm[2]}-${dm[1]}`; if(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(s) && s<=today() && s>=addDays(today(),-60)) date = s; }
+  // Досчитываем недостающее
+  if(liters&&price&&!total) total = Math.round(liters*price);
+  if(total&&price&&!liters) liters = +(total/price).toFixed(2);
+  if(total&&liters&&!price) price = +(total/liters).toFixed(2);
+  if(liters&&price&&total && Math.abs(liters*price-total)/total > 0.1){ liters = +(total/price).toFixed(2); }
+  if(liters && !isL(liters)) liters = null;
+  if(price && !isP(price)) price = null;
+  return {fuel, liters, price, total, date};
+}
+function scanReceipt(){
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.setAttribute('capture','environment');
+  inp.onchange = async ()=>{
+    const file = inp.files[0]; if(!file) return;
+    let cancelled = false;
+    openDialog('Распознаю чек…', `<div class="small muted" id="ocrStage">Загружаю распознавание текста (первый раз ~10–20 сек.)</div><div class="progress"><i id="ocrBar"></i></div>`,
+      [{text:'Отмена', cls:'ghost', onClick:()=>{ cancelled = true; }}]);
+    const stage = $('ocrStage'), bar = $('ocrBar');
+    const onP = m => {
+      if(!stage) return;
+      if(m.status==='recognizing text'){ stage.textContent = 'Читаю чек…'; bar.style.width = (30 + m.progress*70)+'%'; }
+      else if(/load/.test(m.status)){ bar.style.width = (m.progress*30)+'%'; }
+    };
+    try{
+      const w = await getOcr(onP);
+      if(cancelled) return;
+      stage.textContent = 'Подготавливаю фото…';
+      const img = await prepareImage(file);
+      const {data} = await w.recognize(img, {}, {text:true});
+      if(cancelled) return;
+      const r = parseReceipt(data.text);
+      const found = [r.liters&&'литры', r.price&&'цену', r.total&&'сумму', r.fuel&&'топливо'].filter(Boolean);
+      fillDialog({...r, note: found.length ? `Распознал ${found.join(', ')}. Проверьте значения и укажите пробег.` : 'Не удалось прочитать чек — введите данные вручную. Лучше снимать при хорошем свете, ровно и крупно.', noteWarn: found.length<2});
+    }catch(e){
+      if(cancelled) return;
+      fillDialog({note: navigator.onLine ? 'Не удалось распознать чек. Введите данные вручную.' : 'Для первого распознавания нужен интернет. Введите данные вручную.', noteWarn:true});
+    }
+  };
+  inp.click();
+}
+
+/* ===================== Расходы ===================== */
+function expenses(){
+  const c = car();
+  const out = [];
+  S.records.filter(r=>r.carId===c.id && r.cost).forEach(r=>{
+    const it = r.itemId && S.items.find(i=>i.id===r.itemId);
+    out.push({date:r.date, title: it ? it.name : r.title, sub:[r.km?fmt(r.km)+' км':'', r.note].filter(Boolean).join(' · '), cost:r.cost, series: r.kind==='doc'?'doc':'service', ref:'rec', id:r.id});
+  });
+  S.fillups.filter(f=>f.carId===c.id).forEach(f=>{
+    out.push({date:f.date, title:`Заправка ${FUELS.find(q=>q.id===f.fuel)?.name||''}`, sub:`${fmt1(f.liters)} л × ${fmt(f.price)} ₸`, cost:f.liters*f.price, series:'fuel', ref:'fill', id:f.id});
+  });
+  return out.sort((a,b)=>b.date.localeCompare(a.date));
+}
+function monthKeys(n){
+  const d = todayD(); d.setDate(1); const keys = [];
+  for(let i=n-1;i>=0;i--){ const x = new Date(d.getFullYear(), d.getMonth()-i, 1); keys.push(`${x.getFullYear()}-${pad(x.getMonth()+1)}`); }
+  return keys;
+}
+const MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const MONTHS_FULL = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+function niceMax(v){ if(v<=0) return 10000; const p = Math.pow(10, Math.floor(Math.log10(v))); for(const m of [1,2,2.5,5,10]) if(m*p>=v) return m*p; return 10*p; }
+
 /* ===================== Экраны ===================== */
-let tab = 'home', histFilter = 'all';
+let tab = 'home', moneyFilter = 'all';
 function render(){
-  const sel = document.getElementById('carSel');
-  sel.innerHTML = S.cars.map(c=>`<option value="${c.id}" ${c.id===car().id?'selected':''}>${esc(c.name)}</option>`).join('');
+  $('carSel').innerHTML = S.cars.map(c=>`<option value="${c.id}" ${c.id===car().id?'selected':''}>${esc(c.name)}</option>`).join('');
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
-  const v = document.getElementById('view');
-  v.innerHTML = ({home:viewHome, service:viewService, history:viewHistory, fuel:viewFuel})[tab]();
-  v.querySelectorAll('[data-act]').forEach(el=>el.onclick = ()=>ACT[el.dataset.act](el.dataset.id));
-  bindFuelInputs();
+  const att = attention();
+  const svcN = att.filter(a=>a.kind==='item').length, docN = att.filter(a=>a.kind==='doc' && a.s.cls==='bad').length;
+  setDot('service', svcN); setDot('docs', docN);
+  const v = $('view');
+  v.innerHTML = ({home:viewHome, service:viewService, docs:viewDocs, fuel:viewFuel, money:viewMoney})[tab]();
+  v.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click', e=>{ e.preventDefault(); ACT[el.dataset.act](el.dataset.id); }));
+  bindAfterRender();
+}
+function setDot(t, n){
+  const b = document.querySelector(`nav button[data-tab="${t}"]`);
+  let d = b.querySelector('.dot');
+  if(!n){ d && d.remove(); return; }
+  if(!d){ d = document.createElement('span'); d.className='dot'; b.appendChild(d); }
+  d.textContent = n;
 }
 const ACT = {
   mileage: mileageDialog,
   record: id=>recordDialog(id),
   item: id=>itemDialog(S.items.find(i=>i.id===id)),
   newItem: ()=>itemDialog(null),
-  fill: fillDialog,
+  doc: id=>docDialog(S.docs.find(d=>d.id===id)),
+  newDoc: ()=>docDialog(null),
+  renew: id=>renewDialog(S.docs.find(d=>d.id===id)),
+  fill: ()=>fillDialog(),
+  scan: scanReceipt,
+  reminders: ()=>remindersDialog(),
   go: t=>{ tab=t; render(); scrollTo(0,0); },
-  filt: f=>{ histFilter=f; render(); },
+  filt: f=>{ moneyFilter=f; render(); },
   delRec: id=>{ if(!confirm('Удалить запись?')) return; const r=S.records.find(x=>x.id===id); S.records=S.records.filter(x=>x.id!==id); if(r.itemId) recalcItem(r.itemId); save(); render(); },
   delFill: id=>{ if(!confirm('Удалить заправку?')) return; S.fillups=S.fillups.filter(x=>x.id!==id); save(); render(); },
   resetPrices: ()=>{ S.prices={...DEFAULT_PRICES}; S.pricesUpdated=null; save(); render(); },
+  saveMileage: ()=>{ const v = Number($('qMil').value); if(!v){ $('qMil').focus(); return; } setMileage(v, today(), true); save(); render(); toast('Пробег обновлён', null, null, 2000); },
 };
 
 function itemCard(it){
@@ -440,133 +792,337 @@ function itemCard(it){
       <button class="sm" data-act="record" data-id="${it.id}">Заменил</button></div>
   </div>`;
 }
+function docCard(d){
+  const st = docStatus(d);
+  return `<div class="card item">
+    <div class="item-head">
+      <div class="sp"><div class="tag">Документ</div><div class="item-title">${esc(d.name)}</div>${d.note?`<div class="small muted">${esc(d.note)}</div>`:''}</div>
+      <span class="badge b-${st.cls}">${st.label}</span>
+    </div>
+    ${d.expires?`<div class="bar"><i style="width:${Math.min(100,st.pct*100)}%;background:${barColor[st.cls]}"></i></div>`:''}
+    <div class="row small"><span class="sp muted">${st.text}</span>
+      <button class="ghost sm" data-act="doc" data-id="${d.id}">${d.expires?'Изм.':'Указать дату'}</button>
+      ${d.expires?`<button class="sm" data-act="renew" data-id="${d.id}">${d.type==='tax'?'Оплатил':'Продлил'}</button>`:''}</div>
+  </div>`;
+}
+
+function mileageBanner(){
+  const c = car(), est = estMileage(), age = mileageAge();
+  if(!mileageStale()) return '';
+  const first = !c.mileage;
+  return `<div class="card banner" style="margin-bottom:12px">
+    <div class="q">${first?'Укажите пробег автомобиля':'Какой сейчас пробег?'}</div>
+    <div class="small muted">${first?'С него начнётся расчёт замен масла и расходников.':`Последний раз: ${fmt(c.mileage)} км, ${humanDays(age)} назад.${est!==c.mileage?` Примерная оценка — ${fmt(est)} км.`:''}`}</div>
+    <div class="inl"><input id="qMil" type="number" inputmode="numeric" min="0" value="${first?'':est}" placeholder="км по одометру" aria-label="Пробег"><button data-act="saveMileage">Сохранить</button></div>
+  </div>`;
+}
 
 function viewHome(){
-  const c = car(), items = carItems().map(i=>({i, s:status(i)}));
-  const due = items.filter(x=>x.s.cls==='bad'||x.s.cls==='warn').sort((a,b)=>b.s.pct-a.s.pct);
-  const unknown = items.filter(x=>x.s.cls==='none').length;
-  const y = String(new Date().getFullYear());
-  const svc = S.records.filter(r=>r.carId===c.id && r.date.startsWith(y)).reduce((a,b)=>a+b.cost,0);
-  const fuel = S.fillups.filter(f=>f.carId===c.id && f.date.startsWith(y)).reduce((a,b)=>a+b.liters*b.price,0);
+  const c = car(), att = attention(), unknown = carItems().filter(i=>status(i).cls==='none').length;
+  const rate = kmPerDay(), est = estMileage();
+  const ym = today().slice(0,7), ex = expenses();
+  const month = ex.filter(e=>e.date.startsWith(ym)).reduce((a,b)=>a+b.cost,0);
+  const from12 = monthKeys(12)[0];
+  const ex12 = ex.filter(e=>e.date.slice(0,7)>=from12);
+  const firstMonth = ex12.length ? ex12[ex12.length-1].date.slice(0,7) : ym;
+  const nMonths = Math.max(1, monthKeys(12).filter(k=>k>=firstMonth).length);
+  const avgMonth = ex12.reduce((a,b)=>a+b.cost,0)/nMonths;
   const {avg} = fuelStats();
+  const noDocs = carDocs().filter(d=>!d.expires).length;
   return `
+  ${mileageBanner()}
   <div class="grid stats">
-    <div class="card stat"><div class="k">Пробег</div><div class="v">${fmt(c.mileage)} км</div>
-      <button class="ghost sm" style="margin-top:8px" data-act="mileage">Обновить</button></div>
-    <div class="card stat"><div class="k">Требуют внимания</div><div class="v" style="color:${due.length?'var(--warn)':'var(--ok)'}">${due.length}</div>
-      <div class="small muted" style="margin-top:8px">${unknown?`${unknown} без данных`:'все позиции отслеживаются'}</div></div>
-    <div class="card stat"><div class="k">Расходы в ${y}</div><div class="v">${tg(svc+fuel)}</div>
-      <div class="small muted" style="margin-top:8px">ТО ${tg(svc)} · топливо ${tg(fuel)}</div></div>
+    <div class="card stat"><div class="k">Пробег</div><div class="v">${est!==c.mileage?'≈ ':''}${fmt(est)} км</div>
+      <div class="row wrapr small" style="margin-top:6px;gap:6px"><span class="sp muted" style="white-space:nowrap">${rate?`~${fmt(rate*30.4)} км/мес`:'обновляйте раз в неделю'}</span><button class="ghost sm" data-act="mileage">Обновить</button></div></div>
+    <div class="card stat"><div class="k">Требуют внимания</div><div class="v" style="color:${att.length?'var(--warn)':'var(--ok)'}">${att.length}</div>
+      <div class="small muted" style="margin-top:8px">${unknown||noDocs?[unknown?`${unknown} ТО без данных`:'', noDocs?`${noDocs} док. без даты`:''].filter(Boolean).join(', '):'всё отслеживается'}</div></div>
+    <div class="card stat"><div class="k">Машина стоит в месяц</div><div class="v">${ex12.length?tg(avgMonth):'—'}</div>
+      <div class="small muted" style="margin-top:8px">${ex12.length?`в этом месяце ${tg(month)} · <a href="#" data-act="go" data-id="money">подробнее</a>`:'появится после первых расходов'}</div></div>
     <div class="card stat"><div class="k">Средний расход</div><div class="v">${avg?fmt1(avg):fmt1(c.consumption)} л</div>
       <div class="small muted" style="margin-top:8px">${avg?'по заправкам':'указан вручную'} · на 100 км</div></div>
   </div>
-  <h2>Ближайшее обслуживание</h2>
-  ${due.length ? `<div class="list">${due.map(x=>itemCard(x.i)).join('')}</div>`
-    : `<div class="card empty">${unknown===items.length ? 'Начните с того, что отметите, когда последний раз меняли масло, фильтры и жидкости.<br><br><button data-act="go" data-id="service">Заполнить ТО</button>' : 'Всё в порядке — ничего не требует замены в ближайшее время 👍'}</div>`}
+  <div class="row wrapr" style="margin-top:12px">
+    <button class="sp" data-act="fill">⛽ Заправка</button>
+    <button class="sp ghost" data-act="scan">📷 Чек АЗС</button>
+    <button class="sp ghost" data-act="record">🔧 Запись ТО</button>
+  </div>
+  <h2>Ближайшее</h2>
+  ${att.length ? `<div class="list">${att.map(a=>a.kind==='item'?itemCard(a.o):docCard(a.o)).join('')}</div>`
+    : `<div class="card empty">${unknown===carItems().length ? 'Начните с того, что отметите, когда последний раз меняли масло, фильтры и жидкости, и до какого числа действует страховка.<br><br><button data-act="go" data-id="service">Заполнить ТО</button> <button class="ghost" data-act="go" data-id="docs">Документы</button>' : 'Всё в порядке — ничего не требует внимания в ближайшее время 👍'}</div>`}
+  ${remindersCard()}
   <h2>Цены на топливо</h2>
   <div class="card">
     <div class="row wrapr">${FUELS.map(f=>`<div style="min-width:90px" class="sp"><div class="small muted">${f.name}</div><div style="font-weight:700;font-size:18px">${fmt(S.prices[f.id])} ₸</div></div>`).join('')}</div>
-    <div class="note">${S.pricesUpdated?`Обновлено ${dstr(S.pricesUpdated)}`:'Ориентировочные цены по Казахстану — уточните на своей АЗС'} · <a href="#" data-act="go" data-id="fuel" style="color:var(--accent)">изменить</a></div>
+    <div class="note">${S.pricesUpdated?`Обновлено ${dstr(S.pricesUpdated)}`:'Ориентировочные цены по Казахстану — уточните на своей АЗС'} · <a href="#" data-act="go" data-id="fuel">изменить</a></div>
   </div>`;
+}
+function remindersCard(){
+  const st = notifState();
+  if(st==='on') return '';
+  return `<h2>Напоминания</h2><div class="card row">
+    <div class="sp"><div class="item-title">🔔 Не пропустите замену масла и страховку</div>
+    <div class="small muted">${st==='denied'?'Уведомления запрещены в настройках браузера. Можно добавить сроки в календарь телефона.':st==='ios-install'?'На iPhone уведомления работают после установки: «Поделиться» → «На экран „Домой“». А пока — добавьте сроки в календарь.':'Уведомления о сроках ТО, страховки, техосмотра и налога, плюс напоминание обновить пробег.'}</div></div>
+    <button class="sm" data-act="reminders">Настроить</button></div>`;
 }
 
 function viewService(){
   const items = carItems();
   const groups = CATS.map(cat=>({cat, list: items.filter(i=>i.cat===cat).sort((a,b)=>status(b).pct-status(a).pct)})).filter(g=>g.list.length);
+  const est = estMileage();
   return `
+  ${mileageBanner()}
   <div class="row"><h2 class="sp" style="margin:4px 0">Регламент ТО</h2>
     <button class="ghost sm" data-act="newItem">+ Позиция</button>
     <button class="sm" data-act="record">+ Запись</button></div>
-  <p class="small muted">Пробег сейчас: <b>${fmt(car().mileage)} км</b>. Интервалы — типовые, поправьте под свою машину и сервисную книжку.</p>
+  <p class="small muted">Пробег: <b>${est!==car().mileage?'≈ ':''}${fmt(est)} км</b>${est!==car().mileage?` (оценка, последний ввод ${fmt(car().mileage)} км — <a href="#" data-act="mileage">уточнить</a>)`:''}. Интервалы типовые — поправьте под свою машину и сервисную книжку.</p>
   ${groups.map(g=>`<h2>${g.cat}</h2><div class="list">${g.list.map(itemCard).join('')}</div>`).join('')}`;
 }
 
-function viewHistory(){
-  const recs = carRecords();
-  const items = Object.fromEntries(S.items.map(i=>[i.id,i]));
-  const cats = ['all', ...CATS];
-  const shown = recs.filter(r=> histFilter==='all' || (r.itemId ? items[r.itemId]?.cat : 'Другое')===histFilter);
-  const total = shown.reduce((a,b)=>a+b.cost,0);
+function viewDocs(){
+  const docs = carDocs().slice().sort((a,b)=>(a.expires||'9999').localeCompare(b.expires||'9999'));
   return `
-  <div class="row"><h2 class="sp" style="margin:4px 0">История обслуживания</h2><button class="sm" data-act="record">+ Запись</button></div>
-  <div class="chips" style="margin:10px 0">${cats.map(c=>`<button class="chip ${histFilter===c?'on':''}" data-act="filt" data-id="${c}">${c==='all'?'Все':c}</button>`).join('')}</div>
-  ${shown.length ? `<div class="card" style="padding:4px 10px;overflow-x:auto"><table>
-    <thead><tr><th>Дата</th><th>Работа</th><th class="num">Пробег</th><th class="num">₸</th><th></th></tr></thead>
-    <tbody>${shown.map(r=>`<tr><td>${dstr(r.date)}</td><td>${esc(r.itemId?items[r.itemId]?.name:r.title)}${r.note?`<div class="small muted">${esc(r.note)}</div>`:''}</td><td class="num">${fmt(r.km)}</td><td class="num">${r.cost?fmt(r.cost):'—'}</td><td><button class="danger sm" data-act="delRec" data-id="${r.id}" aria-label="Удалить">✕</button></td></tr>`).join('')}</tbody>
-  </table></div><p class="small muted">Итого: <b>${tg(total)}</b> за ${shown.length} ${plural(shown.length,'запись','записи','записей')}</p>`
-  : `<div class="card empty">Записей пока нет. Нажмите «Заменил» у позиции ТО или «+ Запись».</div>`}`;
+  <div class="row"><h2 class="sp" style="margin:4px 0">Документы и сроки</h2><button class="ghost sm" data-act="newDoc">+ Документ</button></div>
+  <p class="small muted">Приложение напомнит заранее. Езда без действующего полиса ОГПО ВТС — это штраф, а налог на транспорт физлица платят до 1 апреля следующего года.</p>
+  <div class="list">${docs.map(docCard).join('')}</div>
+  <div class="note" style="margin-top:12px">Добавьте свои: КАСКО, доверенность, аптечка/огнетушитель (срок годности), разрешение на газ и т.п.</div>`;
 }
-function plural(n,a,b,c){ n=Math.abs(n)%100; const m=n%10; return n>10&&n<20?c:m>1&&m<5?b:m===1?a:c; }
 
 function viewFuel(){
   const c = car(), f = carFillups(), {avg, segs} = fuelStats();
   const cons = avg || c.consumption;
   return `
+  <div class="row" style="margin-bottom:4px"><h2 class="sp" style="margin:4px 0">Заправки</h2>
+    <button class="ghost sm" data-act="scan">📷 Чек</button><button class="sm" data-act="fill">+ Заправка</button></div>
+  ${f.length ? `<div class="card" style="padding:4px 10px;overflow-x:auto"><table>
+    <thead><tr><th>Дата</th><th class="num">Пробег</th><th class="num">Литры</th><th class="num">₸</th><th class="num">л/100</th><th></th></tr></thead>
+    <tbody>${f.slice().reverse().slice(0,30).map(x=>`<tr><td>${dstr(x.date)}<div class="small muted">${FUELS.find(q=>q.id===x.fuel)?.name||''}${x.full?'':' · не полный'}</div></td><td class="num">${fmt(x.km)}</td><td class="num">${fmt1(x.liters)}</td><td class="num">${fmt(x.liters*x.price)}</td><td class="num">${segs[x.id]?fmt1(segs[x.id]):'—'}</td><td><button class="danger sm" data-act="delFill" data-id="${x.id}" aria-label="Удалить">✕</button></td></tr>`).join('')}</tbody>
+  </table></div>
+  <p class="small muted">Средний расход: <b>${avg?fmt1(avg)+' л/100 км':'нужно минимум 2 полных бака'}</b></p>`
+  : `<div class="card empty">Сфотографируйте чек АЗС — литры и сумма подставятся сами. Заправки «до полного» дают реальный расход.</div>`}
+
   <h2>Цены на топливо в Казахстане, ₸/л</h2>
-  <div class="price-grid">${FUELS.map(x=>`<div class="price"><div class="n">${x.name}</div><input type="number" step="0.01" min="0" data-price="${x.id}" value="${S.prices[x.id]}"></div>`).join('')}</div>
-  <div class="note">${S.pricesUpdated?`Вы обновили цены ${dstr(S.pricesUpdated)}.`:'Указаны ориентировочные цены — цены на АЗС отличаются по регионам и сетям (Helios, Sinooil, Qazaq Oil, Gazprom и др.). Впишите актуальные.'} <a href="#" data-act="resetPrices" style="color:var(--accent)">Сбросить</a></div>
+  <div class="price-grid">${FUELS.map(x=>`<div class="price"><div class="n">${x.name}</div><input type="number" step="0.01" min="0" data-price="${x.id}" value="${S.prices[x.id]}" aria-label="${x.name}"></div>`).join('')}</div>
+  <div class="note">${S.pricesUpdated?`Вы обновили цены ${dstr(S.pricesUpdated)}.`:'Указаны ориентировочные цены — на АЗС они отличаются по регионам и сетям (Helios, Sinooil, Qazaq Oil, Gazprom и др.). Впишите актуальные.'} <a href="#" data-act="resetPrices">Сбросить</a></div>
 
   <h2>Калькулятор поездки</h2>
   <div class="card"><div class="form">
     <label>Расстояние, км<input id="c_dist" type="number" min="0" value="100"></label>
-    <label>Расход, л/100 км<input id="c_cons" type="number" step="0.1" min="0" value="${fmt1(cons).replace(',','.').replace(/\s/g,'')}"></label>
+    <label>Расход, л/100 км<input id="c_cons" type="number" step="0.1" min="0" value="${Math.round(cons*10)/10}"></label>
     <label class="full">Топливо<select id="c_fuel">${FUELS.map(x=>`<option value="${x.id}" ${x.id===c.fuel?'selected':''}>${x.name} — ${fmt(S.prices[x.id])} ₸</option>`).join('')}</select></label>
   </div>
   <div class="row" style="margin-top:12px"><div class="sp"><div class="small muted">Стоимость поездки</div><div id="c_res" style="font-size:24px;font-weight:700"></div></div>
-  <div style="text-align:right"><div class="small muted">Литров</div><div id="c_l" style="font-size:18px;font-weight:600"></div></div></div></div>
-
-  <div class="row"><h2 class="sp">Журнал заправок</h2><button class="sm" data-act="fill">+ Заправка</button></div>
-  ${f.length ? `<div class="card" style="padding:4px 10px;overflow-x:auto"><table>
-    <thead><tr><th>Дата</th><th class="num">Пробег</th><th class="num">Литры</th><th class="num">₸</th><th class="num">л/100</th><th></th></tr></thead>
-    <tbody>${f.slice().reverse().map(x=>`<tr><td>${dstr(x.date)}<div class="small muted">${FUELS.find(q=>q.id===x.fuel)?.name||''}${x.full?'':' · не полный'}</div></td><td class="num">${fmt(x.km)}</td><td class="num">${fmt1(x.liters)}</td><td class="num">${fmt(x.liters*x.price)}</td><td class="num">${segs[x.id]?fmt1(segs[x.id]):'—'}</td><td><button class="danger sm" data-act="delFill" data-id="${x.id}" aria-label="Удалить">✕</button></td></tr>`).join('')}</tbody>
-  </table></div>
-  <p class="small muted">Средний расход: <b>${avg?fmt1(avg)+' л/100 км':'нужно минимум 2 полных бака'}</b> · Всего: <b>${tg(f.reduce((a,b)=>a+b.liters*b.price,0))}</b></p>`
-  : `<div class="card empty">Добавляйте заправки «до полного бака» — приложение посчитает реальный расход.</div>`}`;
+  <div style="text-align:right"><div class="small muted">Литров</div><div id="c_l" style="font-size:18px;font-weight:600"></div></div></div></div>`;
 }
 
-function bindFuelInputs(){
+function viewMoney(){
+  const ex = expenses(), keys = monthKeys(12);
+  const byM = Object.fromEntries(keys.map(k=>[k,{fuel:0,service:0,doc:0}]));
+  ex.forEach(e=>{ const k=e.date.slice(0,7); if(byM[k]) byM[k][e.series]+=e.cost; });
+  const totals = keys.map(k=>SERIES.reduce((a,s)=>a+byM[k][s.id],0));
+  const sum12 = totals.reduce((a,b)=>a+b,0);
+  const firstIdx = totals.findIndex(v=>v>0);
+  const nM = firstIdx<0 ? 1 : 12-firstIdx;
+  const ym = today().slice(0,7), y = today().slice(0,4);
+  const year = ex.filter(e=>e.date.startsWith(y)).reduce((a,b)=>a+b.cost,0);
+  const bySeries12 = SERIES.map(s=>({...s, v: keys.reduce((a,k)=>a+byM[k][s.id],0)}));
+  // стоимость километра за 12 мес.
+  const pts = [...S.mileageLog, ...S.fillups, ...S.records].filter(p=>p.carId===car().id && p.km>0 && p.date>=keys[0]+'-01');
+  const kmSpan = pts.length>1 ? Math.max(...pts.map(p=>p.km)) - Math.min(...pts.map(p=>p.km)) : 0;
+  const max = niceMax(Math.max(...totals));
+  const shown = ex.filter(e=>moneyFilter==='all' || e.series===moneyFilter);
+  return `
+  <div class="row"><h2 class="sp" style="margin:4px 0">Сколько стоит машина</h2><button class="sm" data-act="record" data-id="">+ Расход</button></div>
+  <div class="grid stats" style="margin-top:10px">
+    <div class="card stat"><div class="k">В среднем в месяц</div><div class="v">${sum12?tg(sum12/nM):'—'}</div></div>
+    <div class="card stat"><div class="k">Этот месяц</div><div class="v">${tg(byM[ym]?SERIES.reduce((a,s)=>a+byM[ym][s.id],0):0)}</div></div>
+    <div class="card stat"><div class="k">С начала ${y} года</div><div class="v">${tg(year)}</div></div>
+    <div class="card stat"><div class="k">1 км обходится в</div><div class="v">${kmSpan>100&&sum12?fmt1(sum12/kmSpan)+' ₸':'—'}</div></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="row"><div class="sp item-title">Расходы по месяцам</div><span class="small muted">12 мес. · ${tg(sum12)}</span></div>
+    ${sum12 ? `
+    <div class="chart" id="chart" role="img" aria-label="Расходы по месяцам за последние 12 месяцев">
+      ${[1,0.5,0].map(f=>`<div class="gl ${f===0?'base':''}" style="top:${(1-f)*100}%"><span>${f?tgShort(max*f):'0'}</span></div>`).join('')}
+      <div class="cols">${keys.map((k,i)=>{
+        const segs = SERIES.map(s=>({s, v:byM[k][s.id]})).filter(x=>x.v>0);
+        return `<div class="col" data-k="${k}" tabindex="0" aria-label="${MONTHS_FULL[+k.slice(5)-1]}: ${tg(totals[i])}">${segs.map((x,j)=>`<i class="${j===segs.length-1?'top':''}" style="height:calc(${x.v/max*100}% - ${segs.length>1?2:0}px);background:${x.s.c}"></i>`).join('')}</div>`;
+      }).join('')}</div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <div class="chart-x">${keys.map(k=>`<span>${MONTHS[+k.slice(5)-1]}</span>`).join('')}</div>
+    <div class="legend">${bySeries12.map(s=>`<span style="--c:${s.c}">${s.name} · ${tg(s.v)}</span>`).join('')}</div>`
+    : `<div class="empty">Здесь появится график, когда вы добавите заправки, ТО или оплату страховки.</div>`}
+  </div>
+  <h2>Все расходы</h2>
+  <div class="chips" style="margin-bottom:10px">${[{id:'all',name:'Все'},...SERIES].map(s=>`<button class="chip ${moneyFilter===s.id?'on':''}" data-act="filt" data-id="${s.id}">${s.name}</button>`).join('')}</div>
+  ${shown.length ? `<div class="card" style="padding:4px 10px;overflow-x:auto"><table>
+    <thead><tr><th>Дата</th><th>Расход</th><th class="num">₸</th><th></th></tr></thead>
+    <tbody>${shown.slice(0,100).map(e=>`<tr><td style="white-space:nowrap">${dstr(e.date)}</td><td>${esc(e.title)}${e.sub?`<div class="small muted">${esc(e.sub)}</div>`:''}</td><td class="num">${fmt(e.cost)}</td><td><button class="danger sm" data-act="${e.ref==='rec'?'delRec':'delFill'}" data-id="${e.id}" aria-label="Удалить">✕</button></td></tr>`).join('')}</tbody>
+  </table></div><p class="small muted">Итого: <b>${tg(shown.reduce((a,b)=>a+b.cost,0))}</b> · ${shown.length} ${plural(shown.length,'запись','записи','записей')}</p>`
+  : `<div class="card empty">Пока пусто.</div>`}`;
+}
+
+function bindAfterRender(){
   document.querySelectorAll('[data-price]').forEach(inp=>inp.onchange = ()=>{
     S.prices[inp.dataset.price] = Number(inp.value)||0; S.pricesUpdated = today(); save(); render();
   });
-  const d = document.getElementById('c_dist'); if(!d) return;
-  const calc = ()=>{
-    const l = (Number(d.value)||0) * (Number(document.getElementById('c_cons').value)||0) / 100;
-    document.getElementById('c_l').textContent = fmt1(l) + ' л';
-    document.getElementById('c_res').textContent = tg(l * S.prices[document.getElementById('c_fuel').value]);
-  };
-  ['c_dist','c_cons','c_fuel'].forEach(id=>document.getElementById(id).oninput = calc); calc();
+  const q = $('qMil'); if(q) q.onkeydown = e=>{ if(e.key==='Enter') ACT.saveMileage(); };
+  const d = $('c_dist');
+  if(d){
+    const calc = ()=>{
+      const l = (Number(d.value)||0) * (Number($('c_cons').value)||0) / 100;
+      $('c_l').textContent = fmt1(l) + ' л';
+      $('c_res').textContent = tg(l * S.prices[$('c_fuel').value]);
+    };
+    ['c_dist','c_cons','c_fuel'].forEach(id=>$(id).oninput = calc); calc();
+  }
+  const ch = $('chart');
+  if(ch){
+    const tip = $('tip'), ex = expenses();
+    const show = col => {
+      ch.querySelectorAll('.col.sel').forEach(c=>c.classList.remove('sel')); col.classList.add('sel');
+      const k = col.dataset.k, sums = {fuel:0,service:0,doc:0};
+      ex.forEach(e=>{ if(e.date.startsWith(k)) sums[e.series]+=e.cost; });
+      const total = SERIES.reduce((a,s)=>a+sums[s.id],0);
+      tip.innerHTML = `<b>${MONTHS_FULL[+k.slice(5)-1]} ${k.slice(0,4)}</b> · ${tg(total)}` + SERIES.map(s=>`<div class="r"><span style="--c:${s.c}">${s.name}</span><span>${tg(sums[s.id])}</span></div>`).join('');
+      tip.hidden = false;
+      const cr = ch.getBoundingClientRect(), r = col.getBoundingClientRect();
+      const half = tip.offsetWidth/2, x = Math.max(half - 44, Math.min(cr.width - half, r.left - cr.left + r.width/2));
+      tip.style.left = x + 'px';
+    };
+    ch.querySelectorAll('.col').forEach(col=>{
+      col.addEventListener('mouseenter', ()=>show(col));
+      col.addEventListener('click', ()=>show(col));
+      col.addEventListener('focus', ()=>show(col));
+    });
+    ch.addEventListener('mouseleave', ()=>{ tip.hidden = true; ch.querySelectorAll('.col.sel').forEach(c=>c.classList.remove('sel')); });
+  }
+}
+
+/* ===================== Напоминания ===================== */
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function notifState(){
+  if(!('Notification' in window) || !('serviceWorker' in navigator)) return isIOS && !isStandalone ? 'ios-install' : 'unsupported';
+  if(Notification.permission==='denied') return 'denied';
+  if(Notification.permission==='granted' && S.settings.notify) return 'on';
+  return 'off';
+}
+// Список сроков для уведомлений и календаря
+function reminderList(){
+  const out = [];
+  S.cars.forEach(c=>{
+    const prev = S.activeCarId; S.activeCarId = c.id;
+    const pre = S.cars.length>1 ? `${c.name}: ` : '';
+    carItems().forEach(i=>{ const s = status(i); if(s.due) out.push({key:'i'+i.id, title:`${pre}${i.name}`, body: s.cls==='bad'?'Пора менять — '+s.text:'Скоро замена — '+s.text, due:s.due, remind:14}); });
+    carDocs().forEach(d=>{ if(d.expires) out.push({key:'d'+d.id+d.expires, title:`${pre}${d.name}`, body: d.type==='tax' ? `Оплатить до ${dstr(d.expires)}` : `Действует до ${dstr(d.expires)} — не забудьте продлить`, due:d.expires, remind:d.remind}); });
+    S.activeCarId = prev;
+  });
+  return out;
+}
+async function syncReminders(){
+  // значок на иконке приложения
+  try{
+    const n = S.cars.reduce((a,c)=>{ const p=S.activeCarId; S.activeCarId=c.id; const k=attention().length; S.activeCarId=p; return a+k; },0);
+    if('setAppBadge' in navigator){ n ? navigator.setAppBadge(n) : navigator.clearAppBadge(); }
+  }catch(e){}
+  // снимок для фоновой проверки в service worker
+  try{
+    if(!('caches' in window)) return;
+    const c = await caches.open('avtouchet-data');
+    await c.put('reminders.json', new Response(JSON.stringify({
+      enabled: !!S.settings.notify, generated: today(),
+      items: reminderList(),
+      mileage: S.cars.map(c=>({car:c.name, date:c.mileageDate, km:c.mileage})),
+    }), {headers:{'Content-Type':'application/json'}}));
+  }catch(e){}
+}
+async function enableNotifications(){
+  if(!('Notification' in window)){ alert(isIOS ? 'Сначала установите приложение: «Поделиться» → «На экран „Домой“», откройте его с главного экрана и включите напоминания там.' : 'Этот браузер не поддерживает уведомления. Используйте экспорт в календарь.'); return; }
+  const p = await Notification.requestPermission();
+  if(p!=='granted'){ S.settings.notify=false; save(); remindersDialog(); return; }
+  S.settings.notify = true; save();
+  let bg = false;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    if('periodicSync' in reg){
+      const st = await navigator.permissions.query({name:'periodic-background-sync'});
+      if(st.state==='granted'){ await reg.periodicSync.register('avtouchet-check', {minInterval: 12*60*60*1000}); bg = true; }
+    }
+    S.settings.background = bg; save();
+    const n = attention().length;
+    reg.showNotification('Напоминания включены', {body: n ? `Сейчас требуют внимания: ${n}. Мы напомним о сроках ТО и документов.` : 'Мы заранее напомним о замене масла, страховке, техосмотре и налоге.', icon:'icons/icon-192.png', badge:'icons/icon-192.png', tag:'avtouchet-welcome'});
+  }catch(e){}
+  remindersDialog(); render();
+}
+function remindersDialog(){
+  const st = notifState(), bg = S.settings.background;
+  const statusLine = {
+    on: `✅ Уведомления включены. ${bg ? 'Проверка сроков идёт в фоне примерно раз в 12 часов.' : 'Этот браузер не умеет проверять сроки в фоне — уведомление придёт, когда вы откроете приложение. Чтобы не зависеть от этого, добавьте сроки в календарь.'}`,
+    off: 'Уведомления выключены.',
+    denied: '⛔ Уведомления запрещены в настройках браузера/телефона для этого сайта.',
+    'ios-install': 'На iPhone уведомления доступны только в установленном приложении: Safari → «Поделиться» → «На экран „Домой“», затем откройте АвтоУчёт с главного экрана.',
+    unsupported: 'Этот браузер не поддерживает уведомления.',
+  }[st];
+  const list = reminderList().filter(r=>daysUntil(r.due) <= 60).sort((a,b)=>a.due.localeCompare(b.due)).slice(0,5);
+  openDialog('Напоминания', `
+    <div class="hint">${statusLine}</div>
+    <p class="small" style="margin:0 0 6px"><b>Календарь — самый надёжный способ.</b> Файл добавит в календарь телефона все сроки ТО и документов с напоминаниями за неделю и за день. Работает на любом телефоне, даже без интернета.</p>
+    <p class="small muted" style="margin:0">Раз в неделю приложение также попросит обновить пробег — от него зависят сроки замены масла.</p>
+    ${list.length?`<div class="note"><b>Ближайшие сроки:</b><br>${list.map(r=>`${r.due<today()?'<span style="color:var(--bad)">просрочено</span>':dstr(r.due)} — ${esc(r.title)}`).join('<br>')}</div>`:''}`,
+  [
+    {text:'Закрыть', cls:'ghost'},
+    {text:'📅 В календарь', cls:'ghost', onClick:()=>{ exportIcs(); return false; }},
+    ...(st==='off'||st==='ios-install' ? [{text:'🔔 Включить уведомления', onClick:()=>{ enableNotifications(); return false; }}] : []),
+    ...(st==='on' ? [{text:'Выключить', cls:'danger', onClick:()=>{ S.settings.notify=false; save(); render(); }}] : []),
+  ]);
+}
+function exportIcs(){
+  const L = reminderList().filter(r=>r.due);
+  if(!L.length){ alert('Пока нет сроков: отметьте последние замены в разделе ТО и даты документов.'); return; }
+  const icsEsc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  const ymd = s => s.replace(/-/g,'');
+  const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const ev = L.map(r=>{
+    const due = r.due < today() ? today() : r.due;
+    return ['BEGIN:VEVENT', `UID:${r.key}@avtouchet`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${ymd(due)}`, `DTEND;VALUE=DATE:${ymd(addDays(due,1))}`,
+      `SUMMARY:${icsEsc('🚗 '+r.title)}`, `DESCRIPTION:${icsEsc(r.body+'\nАвтоУчёт: '+location.href.split('?')[0])}`,
+      'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc(r.title)}`,'TRIGGER:-P7D','END:VALARM',
+      'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc(r.title)}`,'TRIGGER:-PT15H','END:VALARM',
+      'END:VEVENT'].join('\r\n');
+  });
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AvtoUchet//RU','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:АвтоУчёт', ...ev, 'END:VCALENDAR'].join('\r\n');
+  download(new Blob([ics], {type:'text/calendar;charset=utf-8'}), 'avtouchet.ics');
+  toast(`Сохранено событий: ${L.length}. Откройте файл, чтобы добавить в календарь.`, null, null, 4000);
 }
 
 /* ===================== Старт ===================== */
 load();
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; render(); scrollTo(0,0); });
-document.getElementById('carSel').onchange = e=>{ S.activeCarId = e.target.value; save(); render(); };
-document.getElementById('carEditBtn').onclick = ()=>carDialog(false);
-document.addEventListener('click', e=>{ if(e.target.matches('a[data-act]')) e.preventDefault(); });
+$('carSel').onchange = e=>{ S.activeCarId = e.target.value; save(); render(); };
+$('carEditBtn').onclick = ()=>carDialog(false);
 render();
+syncReminders();
+
 let firstRun = false;
 try{ if(!localStorage.getItem(KEY+'.seen')){ localStorage.setItem(KEY+'.seen','1'); firstRun = true; setTimeout(()=>carDialog(false),300); } }catch(e){}
 
-/* ===================== PWA ===================== */
-function toast(text, btnText, onBtn){
-  const t = document.getElementById('toast');
-  document.getElementById('toastText').textContent = text;
-  const b = document.getElementById('toastBtn');
-  b.hidden = !btnText; b.textContent = btnText||''; b.onclick = ()=>{ t.hidden = true; onBtn && onBtn(); };
-  document.getElementById('toastClose').onclick = ()=>{ t.hidden = true; };
-  t.hidden = false;
-}
-
-// Ярлыки с иконки приложения: ?action=fill / ?action=record
+// Ярлыки и переходы из уведомлений: ?action=fill / record / scan / mileage / docs
 (()=>{
   const a = new URLSearchParams(location.search).get('action');
   if(!a || firstRun) return;
   history.replaceState(null, '', location.pathname);
   if(a==='fill'){ tab='fuel'; render(); fillDialog(); }
+  if(a==='scan'){ tab='fuel'; render(); toast('Сфотографируйте чек АЗС', 'Открыть камеру', scanReceipt); }
   if(a==='record'){ tab='service'; render(); recordDialog(); }
+  if(a==='mileage'){ render(); mileageDialog(); }
+  if(a==='docs'){ tab='docs'; render(); }
 })();
 
-const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+// Перерисовка при смене дня / возвращении в приложение — сроки и оценка пробега меняются со временем
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && !dlg.open){ render(); syncReminders(); } });
+
+/* ===================== PWA ===================== */
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
   navigator.serviceWorker.register('sw.js').then(reg=>{
     const offerUpdate = w => toast('Доступна новая версия приложения', 'Обновить', ()=>w.postMessage('skipWaiting'));
@@ -575,24 +1131,19 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       const w = reg.installing;
       w.addEventListener('statechange', ()=>{ if(w.state==='installed' && navigator.serviceWorker.controller) offerUpdate(w); });
     });
+    // Без фоновой проверки — проверяем сроки при открытии приложения (не чаще раза в день на каждый срок)
+    navigator.serviceWorker.ready.then(r=>{ if(S.settings.notify && r.active) r.active.postMessage('check'); });
   }).catch(()=>{});
   let reloading = false;
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(!reloading){ reloading = true; location.reload(); } });
 }
-// Просим браузер не удалять данные при нехватке места
 if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 
-// Установка на главный экран
 let deferredPrompt = null;
-const installBtn = document.getElementById('installBtn');
+const installBtn = $('installBtn');
 addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt = e; installBtn.hidden = false; });
-installBtn.onclick = async ()=>{
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.hidden = true;
-};
+installBtn.onclick = async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.hidden = true; };
 addEventListener('appinstalled', ()=>{ installBtn.hidden = true; });
-// iOS Safari не поддерживает кнопку установки — показываем подсказку один раз
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 try{
   if(isIOS && !isStandalone && !firstRun && !localStorage.getItem(KEY+'.iosHint')){
     localStorage.setItem(KEY+'.iosHint','1');
