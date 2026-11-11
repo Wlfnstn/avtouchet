@@ -495,6 +495,7 @@ function carDialog(isNew){
       <button type="button" class="ghost sm" id="newCarBtn">+ Ещё авто</button>
       <button type="button" class="ghost sm" id="expBtn">Экспорт</button>
       <button type="button" class="ghost sm" id="impBtn">Импорт</button>
+      <button type="button" class="ghost sm" id="shareBtn">📤 Поделиться приложением</button>
       ${S.cars.length>1?'<button type="button" class="danger sm" id="delCarBtn">Удалить авто</button>':''}
     </div>`}
   `, [
@@ -520,6 +521,7 @@ function carDialog(isNew){
     $('newCarBtn').onclick = ()=>carDialog(true);
     $('expBtn').onclick = exportData;
     $('impBtn').onclick = importData;
+    $('shareBtn').onclick = shareApp;
     const del = $('delCarBtn');
     if(del) del.onclick = ()=>{
       if(!confirm(`Удалить «${car().name}» со всей историей?`)) return;
@@ -543,9 +545,46 @@ async function exportData(){
   // В резервную копию кладём и файлы документов (в base64), чтобы их можно было перенести на новый телефон
   const blobs = {};
   for(const f of S.files){ try{ const r = await fileDb.get(f.id); if(r) blobs[f.id] = await blobToDataUrl(r.blob); }catch(e){} }
+  const name = `avtouchet-${today()}.json`;
   const blob = new Blob([JSON.stringify({...S, fileData: blobs})],{type:'application/json'});
-  download(blob, `avtouchet-${today()}.json`);
-  if(S.files.length) toast(`Копия сохранена вместе с файлами (${S.files.length})`, null, null, 3000);
+  // На телефоне — через меню «Поделиться»: можно сразу сохранить в Файлы, Google Диск или отправить себе в Telegram
+  let shared = false;
+  try{
+    const file = new File([blob], name, {type:'application/json'});
+    if(matchMedia('(pointer:coarse)').matches && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'АвтоУчёт — резервная копия'}); shared = true;
+    }
+  }catch(e){ if(e && e.name==='AbortError') return; }
+  if(!shared) download(blob, name);
+  S.settings.lastBackup = today(); S.settings.backupSnooze = null; save(); render();
+  toast(S.files.length ? `Копия сохранена вместе с файлами (${S.files.length})` : 'Резервная копия сохранена', null, null, 3000);
+}
+const APP_URL = 'https://wlfnstn.github.io/avtouchet/';
+async function shareApp(){
+  const data = {title:'АвтоУчёт', text:'Учёт ТО, документов, расходов на авто и цены на бензин в Казахстане', url:APP_URL};
+  try{ if(navigator.share){ await navigator.share(data); return; } }catch(e){ if(e && e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(APP_URL); toast('Ссылка скопирована', null, null, 2500); }
+  catch(e){ toast(APP_URL); }
+}
+// Есть что терять — а копии давно не было
+function backupDue(){
+  const n = S.records.length + S.fillups.length + S.files.length;
+  if(n < 5) return false;
+  const st = S.settings, t = today();
+  if(st.backupSnooze && st.backupSnooze > t) return false;
+  return !st.lastBackup || daysBetween(parseD(st.lastBackup), todayD()) >= 30;
+}
+function safetyCards(){
+  let h = '';
+  if(isIOS && !isStandalone && !S.settings.iosHide) h += `<div class="card banner" style="margin-bottom:12px">
+    <div class="q">Установите приложение на iPhone</div>
+    <div class="small muted">В Safari нажмите «Поделиться» (квадрат со стрелкой вверх) → «На экран „Домой“». Без установки iPhone может удалить данные сайта, если его долго не открывать.</div>
+    <div class="row" style="margin-top:8px"><button class="ghost sm" data-act="iosHide">Понятно</button></div></div>`;
+  if(backupDue()) h += `<div class="card banner" style="margin-bottom:12px">
+    <div class="q">Сохраните резервную копию</div>
+    <div class="small muted">Все записи хранятся только на этом телефоне. ${S.settings.lastBackup?`Последняя копия — ${dstr(S.settings.lastBackup)}.`:'Копии ещё не было.'} Сохраните файл в «Файлы», на Диск или отправьте себе в мессенджер — при смене телефона его можно будет загрузить через ⚙︎ → Импорт.</div>
+    <div class="row" style="margin-top:8px;gap:8px"><button class="sm" data-act="backup">Сохранить копию</button><button class="ghost sm" data-act="backupLater">Позже</button></div></div>`;
+  return h;
 }
 function download(blob, name){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
@@ -916,7 +955,7 @@ function fillDialog(pre){
   p.oninput = ()=>{ if(s.value && !l.value) s.oninput(); else l.oninput(); };
   fu.onchange = ()=>{ p.value = S.prices[fu.value]; l.oninput(); };
   $('scanInDlg').onclick = scanReceipt;
-  if(!pre.liters && !pre.total) setTimeout(()=>$('f_km').select(), 50);
+  if(!pre.liters && !pre.total) setTimeout(()=>{ const i=$('f_km'); i && i.select(); }, 50);
   else setTimeout(()=>$('f_km').focus(), 50);
 }
 function fuelStats(){
@@ -1109,6 +1148,9 @@ const ACT = {
   delRec: id=>{ if(!confirm('Удалить запись?')) return; const r=S.records.find(x=>x.id===id); S.records=S.records.filter(x=>x.id!==id); if(r.itemId) recalcItem(r.itemId); save(); render(); },
   delFill: id=>{ if(!confirm('Удалить заправку?')) return; S.fillups=S.fillups.filter(x=>x.id!==id); save(); render(); },
   liveOn: ()=>{ S.pricesManual = false; applyLive(); save(); render(); },
+  backup: ()=>exportData(),
+  backupLater: ()=>{ const d = todayD(); d.setDate(d.getDate()+14); S.settings.backupSnooze = iso(d); save(); render(); },
+  iosHide: ()=>{ S.settings.iosHide = true; save(); render(); },
   saveMileage: ()=>{ const v = Number($('qMil').value); if(!v){ $('qMil').focus(); return; } setMileage(v, today(), true); save(); render(); toast('Пробег обновлён', null, null, 2000); },
 };
 
@@ -1167,7 +1209,7 @@ function viewHome(){
   const {avg} = fuelStats();
   const noDocs = carDocs().filter(d=>!d.expires && d.type!=='tax').length;
   return `
-  ${mileageBanner()}
+  ${safetyCards()}${mileageBanner()}
   <div class="grid stats">
     <div class="card stat"><div class="k">Пробег</div><div class="v">${est!==c.mileage?'≈ ':''}${fmt(est)} км</div>
       <div class="small muted" style="margin-top:4px">${rate?`в среднем ${fmt(rate*30.4)} км в месяц`:'обновляйте раз в неделю'}</div>
