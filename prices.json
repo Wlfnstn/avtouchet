@@ -1,6 +1,6 @@
 {
  "date": "2026-11-13",
- "fetched": "2026-11-13T10:41+05:00",
+ "fetched": "2026-11-13T13:58+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -233,6 +233,47 @@
     }
    ]
   },
+  "shymkent": {
+   "name": "Шымкент",
+   "date": "2026-11-13",
+   "avg": {
+    "ai92": 243,
+    "ai95": 306,
+    "ai98": 350,
+    "dt": 356
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 13,
+     "prices": {
+      "ai92": 240,
+      "ai95": 306,
+      "ai98": 350,
+      "dt": 356
+     }
+    },
+    {
+     "name": "Алатау Премиум Мунай",
+     "stations": 10,
+     "prices": {
+      "ai92": 245,
+      "ai95": 306,
+      "dt": 356
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 166,
+      "ai95": 186,
+      "ai98": 199,
+      "dt": 181
+     }
+    }
+   ]
+  },
   "karaganda": {
    "name": "Караганда",
    "date": "2026-11-13",
@@ -306,38 +347,6 @@
       "ai95": 298,
       "ai98": 345,
       "dt": 350
-     }
-    }
-   ]
-  },
-  "atyrau": {
-   "name": "Атырау",
-   "date": "2026-11-13",
-   "avg": {
-    "ai92": 198,
-    "ai95": 238,
-    "ai98": 337,
-    "dt": 263
-   },
-   "networks": [
-    {
-     "name": "Helios",
-     "stations": 10,
-     "prices": {
-      "ai92": 236,
-      "ai95": 296,
-      "ai98": 337,
-      "dt": 347
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 159,
-      "ai95": 180,
-      "ai98": 194,
-      "dt": 179
      }
     }
    ]
@@ -477,38 +486,6 @@
     }
    ]
   },
-  "uralsk": {
-   "name": "Уральск",
-   "date": "2026-11-13",
-   "avg": {
-    "ai92": 205,
-    "ai95": 255,
-    "dt": 264,
-    "gas": 85
-   },
-   "networks": [
-    {
-     "name": "НЕФТЭК",
-     "stations": 8,
-     "prices": {
-      "ai92": 244,
-      "ai95": 329,
-      "dt": 347,
-      "gas": 85
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 166,
-      "ai95": 180,
-      "ai98": 199,
-      "dt": 181
-     }
-    }
-   ]
-  },
   "kostanaj": {
    "name": "Костанай",
    "date": "2026-11-13",
@@ -527,28 +504,6 @@
       "ai95": 187,
       "ai98": 199,
       "dt": 186
-     }
-    }
-   ]
-  },
-  "taldykorgan": {
-   "name": "Талдыкорган",
-   "date": "2026-11-13",
-   "avg": {
-    "ai92": 255,
-    "ai95": 322,
-    "ai98": 365,
-    "dt": 359
-   },
-   "networks": [
-    {
-     "name": "Royal Petrol",
-     "stations": null,
-     "prices": {
-      "ai92": 255,
-      "ai95": 322,
-      "ai98": 365,
-      "dt": 359
      }
     }
    ]
