@@ -1,6 +1,6 @@
 {
  "date": "2026-11-14",
- "fetched": "2026-11-14T10:40+05:00",
+ "fetched": "2026-11-14T20:27+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -319,38 +319,6 @@
     }
    ]
   },
-  "aktobe": {
-   "name": "Актобе",
-   "date": "2026-11-14",
-   "avg": {
-    "ai92": 201,
-    "ai95": 236,
-    "ai98": 345,
-    "dt": 267
-   },
-   "networks": [
-    {
-     "name": "Qazaq Oil",
-     "stations": 20,
-     "prices": {
-      "ai92": 160,
-      "ai95": 174,
-      "ai98": 193,
-      "dt": 184
-     }
-    },
-    {
-     "name": "Helios",
-     "stations": 11,
-     "prices": {
-      "ai92": 242,
-      "ai95": 298,
-      "ai98": 345,
-      "dt": 350
-     }
-    }
-   ]
-  },
   "atyrau": {
    "name": "Атырау",
    "date": "2026-11-14",
@@ -514,38 +482,6 @@
       "ai95": 189,
       "ai98": 199,
       "dt": 185
-     }
-    }
-   ]
-  },
-  "uralsk": {
-   "name": "Уральск",
-   "date": "2026-11-14",
-   "avg": {
-    "ai92": 205,
-    "ai95": 255,
-    "dt": 264,
-    "gas": 85
-   },
-   "networks": [
-    {
-     "name": "НЕФТЭК",
-     "stations": 8,
-     "prices": {
-      "ai92": 244,
-      "ai95": 329,
-      "dt": 347,
-      "gas": 85
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 166,
-      "ai95": 180,
-      "ai98": 199,
-      "dt": 181
      }
     }
    ]
