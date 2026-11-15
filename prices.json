@@ -1,6 +1,6 @@
 {
  "date": "2026-11-15",
- "fetched": "2026-11-15T11:30+05:00",
+ "fetched": "2026-11-15T13:34+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -233,47 +233,43 @@
     }
    ]
   },
-  "karaganda": {
-   "name": "Караганда",
+  "shymkent": {
+   "name": "Шымкент",
    "date": "2026-11-15",
    "avg": {
-    "ai92": 253,
-    "ai95": 316,
-    "ai98": 341,
-    "dt": 348,
-    "gas": 109
+    "ai92": 243,
+    "ai95": 306,
+    "ai98": 350,
+    "dt": 356
    },
    "networks": [
     {
-     "name": "ГазOilПром",
-     "stations": 18,
+     "name": "Helios",
+     "stations": 13,
      "prices": {
-      "ai92": 251,
-      "ai95": 316,
-      "ai98": 344,
-      "dt": 345,
-      "gas": 112
+      "ai92": 240,
+      "ai95": 306,
+      "ai98": 350,
+      "dt": 356
      }
     },
     {
-     "name": "Helios",
-     "stations": 12,
+     "name": "Алатау Премиум Мунай",
+     "stations": 10,
      "prices": {
-      "ai92": 255,
-      "ai95": 316,
-      "ai98": 337,
-      "dt": 351,
-      "gas": 106
+      "ai92": 245,
+      "ai95": 306,
+      "dt": 356
      }
     },
     {
      "name": "Qazaq Oil",
      "stations": null,
      "prices": {
-      "ai92": 170,
-      "ai95": 189,
+      "ai92": 166,
+      "ai95": 186,
       "ai98": 199,
-      "dt": 186
+      "dt": 181
      }
     }
    ]
@@ -477,34 +473,24 @@
     }
    ]
   },
-  "uralsk": {
-   "name": "Уральск",
+  "kostanaj": {
+   "name": "Костанай",
    "date": "2026-11-15",
    "avg": {
-    "ai92": 205,
-    "ai95": 255,
-    "dt": 264,
-    "gas": 85
+    "ai92": 174,
+    "ai95": 187,
+    "ai98": 199,
+    "dt": 186
    },
    "networks": [
-    {
-     "name": "НЕФТЭК",
-     "stations": 8,
-     "prices": {
-      "ai92": 244,
-      "ai95": 329,
-      "dt": 347,
-      "gas": 85
-     }
-    },
     {
      "name": "Qazaq Oil",
      "stations": null,
      "prices": {
-      "ai92": 166,
-      "ai95": 180,
+      "ai92": 174,
+      "ai95": 187,
       "ai98": 199,
-      "dt": 181
+      "dt": 186
      }
     }
    ]
