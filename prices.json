@@ -1,6 +1,6 @@
 {
  "date": "2026-11-15",
- "fetched": "2026-11-15T13:34+05:00",
+ "fetched": "2026-11-15T20:33+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -274,34 +274,47 @@
     }
    ]
   },
-  "aktobe": {
-   "name": "Актобе",
+  "karaganda": {
+   "name": "Караганда",
    "date": "2026-11-15",
    "avg": {
-    "ai92": 201,
-    "ai95": 236,
-    "ai98": 345,
-    "dt": 267
+    "ai92": 253,
+    "ai95": 316,
+    "ai98": 341,
+    "dt": 348,
+    "gas": 109
    },
    "networks": [
     {
-     "name": "Qazaq Oil",
-     "stations": 20,
+     "name": "ГазOilПром",
+     "stations": 18,
      "prices": {
-      "ai92": 160,
-      "ai95": 174,
-      "ai98": 193,
-      "dt": 184
+      "ai92": 251,
+      "ai95": 316,
+      "ai98": 344,
+      "dt": 345,
+      "gas": 112
      }
     },
     {
      "name": "Helios",
-     "stations": 11,
+     "stations": 12,
      "prices": {
-      "ai92": 242,
-      "ai95": 298,
-      "ai98": 345,
-      "dt": 350
+      "ai92": 255,
+      "ai95": 316,
+      "ai98": 337,
+      "dt": 351,
+      "gas": 106
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 170,
+      "ai95": 189,
+      "ai98": 199,
+      "dt": 186
      }
     }
    ]
@@ -378,39 +391,6 @@
     }
    ]
   },
-  "pavlodar": {
-   "name": "Павлодар",
-   "date": "2026-11-15",
-   "avg": {
-    "ai92": 251,
-    "ai95": 306,
-    "ai98": 341,
-    "dt": 339,
-    "gas": 110
-   },
-   "networks": [
-    {
-     "name": "Helios",
-     "stations": 11,
-     "prices": {
-      "ai92": 254,
-      "ai95": 313,
-      "ai98": 341,
-      "dt": 348,
-      "gas": 110
-     }
-    },
-    {
-     "name": "PETROLUX",
-     "stations": 2,
-     "prices": {
-      "ai92": 247,
-      "ai95": 298,
-      "dt": 330
-     }
-    }
-   ]
-  },
   "petropavlovsk": {
    "name": "Петропавловск",
    "date": "2026-11-15",
@@ -473,6 +453,38 @@
     }
    ]
   },
+  "uralsk": {
+   "name": "Уральск",
+   "date": "2026-11-15",
+   "avg": {
+    "ai92": 205,
+    "ai95": 255,
+    "dt": 264,
+    "gas": 85
+   },
+   "networks": [
+    {
+     "name": "НЕФТЭК",
+     "stations": 8,
+     "prices": {
+      "ai92": 244,
+      "ai95": 329,
+      "dt": 347,
+      "gas": 85
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 166,
+      "ai95": 180,
+      "ai98": 199,
+      "dt": 181
+     }
+    }
+   ]
+  },
   "kostanaj": {
    "name": "Костанай",
    "date": "2026-11-15",
@@ -513,28 +525,6 @@
       "ai95": 322,
       "ai98": 365,
       "dt": 359
-     }
-    }
-   ]
-  },
-  "taraz": {
-   "name": "Тараз",
-   "date": "2026-11-15",
-   "avg": {
-    "ai92": 253,
-    "ai95": 306,
-    "dt": 363,
-    "gas": 107
-   },
-   "networks": [
-    {
-     "name": "Royal Petrol",
-     "stations": null,
-     "prices": {
-      "ai92": 253,
-      "ai95": 306,
-      "dt": 363,
-      "gas": 107
      }
     }
    ]
