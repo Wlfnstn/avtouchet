@@ -1,6 +1,6 @@
 {
  "date": "2026-11-17",
- "fetched": "2026-11-17T10:42+05:00",
+ "fetched": "2026-11-17T19:48+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -191,43 +191,54 @@
     }
    ]
   },
-  "shymkent": {
-   "name": "Шымкент",
+  "astana": {
+   "name": "Астана",
    "date": "2026-11-17",
    "avg": {
-    "ai92": 243,
-    "ai95": 306,
-    "ai98": 350,
-    "dt": 357
+    "ai92": 254,
+    "ai95": 318,
+    "ai98": 359,
+    "dt": 352
    },
    "networks": [
     {
-     "name": "Helios",
-     "stations": 13,
+     "name": "Qazaq Oil",
+     "stations": 20,
      "prices": {
-      "ai92": 240,
-      "ai95": 306,
-      "ai98": 350,
-      "dt": 356
+      "ai92": 169,
+      "ai95": 188,
+      "ai98": 196,
+      "dt": 185
+     }
+    },
+    {
+     "name": "Helios",
+     "stations": 14,
+     "prices": {
+      "ai92": 255,
+      "ai95": 317,
+      "ai98": 357,
+      "dt": 351
      }
     },
     {
      "name": "Алатау Премиум Мунай",
-     "stations": 10,
+     "stations": 7,
      "prices": {
-      "ai92": 245,
-      "ai95": 306,
-      "dt": 358
+      "ai92": 255,
+      "ai95": 316,
+      "ai98": 355,
+      "dt": 355
      }
     },
     {
-     "name": "Qazaq Oil",
-     "stations": null,
+     "name": "Compass",
+     "stations": 3,
      "prices": {
-      "ai92": 166,
-      "ai95": 186,
-      "ai98": 199,
-      "dt": 181
+      "ai92": 253,
+      "ai95": 321,
+      "ai98": 365,
+      "dt": 351
      }
     }
    ]
@@ -347,46 +358,6 @@
       "ai95": 180,
       "ai98": 194,
       "dt": 179
-     }
-    }
-   ]
-  },
-  "ust-kamenogorsk": {
-   "name": "Усть-Каменогорск",
-   "date": "2026-11-17",
-   "avg": {
-    "ai92": 255,
-    "ai95": 314,
-    "ai98": 341,
-    "dt": 357
-   },
-   "networks": [
-    {
-     "name": "Royal Petrol",
-     "stations": 11,
-     "prices": {
-      "ai92": 255,
-      "ai95": 314,
-      "dt": 357
-     }
-    },
-    {
-     "name": "Helios",
-     "stations": 8,
-     "prices": {
-      "ai92": 255,
-      "ai95": 314,
-      "ai98": 341,
-      "dt": 357
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 173,
-      "ai95": 185,
-      "dt": 186
      }
     }
    ]
@@ -558,6 +529,28 @@
       "ai95": 322,
       "ai98": 365,
       "dt": 359
+     }
+    }
+   ]
+  },
+  "taraz": {
+   "name": "Тараз",
+   "date": "2026-11-17",
+   "avg": {
+    "ai92": 253,
+    "ai95": 306,
+    "dt": 363,
+    "gas": 107
+   },
+   "networks": [
+    {
+     "name": "Royal Petrol",
+     "stations": null,
+     "prices": {
+      "ai92": 253,
+      "ai95": 306,
+      "dt": 363,
+      "gas": 107
      }
     }
    ]
