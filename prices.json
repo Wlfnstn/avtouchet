@@ -1,12 +1,12 @@
 {
  "date": "2026-11-22",
- "fetched": "2026-11-22T10:55+05:00",
+ "fetched": "2026-11-22T13:32+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
   "ai92": 234,
   "ai95": 287,
-  "ai98": 315,
+  "ai98": 344,
   "dt": 318,
   "gas": 106
  },
@@ -371,38 +371,6 @@
     }
    ]
   },
-  "atyrau": {
-   "name": "Атырау",
-   "date": "2026-11-22",
-   "avg": {
-    "ai92": 199,
-    "ai95": 238,
-    "ai98": 337,
-    "dt": 263
-   },
-   "networks": [
-    {
-     "name": "Helios",
-     "stations": 10,
-     "prices": {
-      "ai92": 239,
-      "ai95": 296,
-      "ai98": 337,
-      "dt": 347
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 159,
-      "ai95": 180,
-      "ai98": 194,
-      "dt": 179
-     }
-    }
-   ]
-  },
   "ust-kamenogorsk": {
    "name": "Усть-Каменогорск",
    "date": "2026-11-22",
@@ -594,7 +562,7 @@
   },
   "taldykorgan": {
    "name": "Талдыкорган",
-   "date": "2026-11-21",
+   "date": "2026-11-22",
    "avg": {
     "ai92": 255,
     "ai95": 322,
@@ -616,7 +584,7 @@
   },
   "taraz": {
    "name": "Тараз",
-   "date": "2026-11-21",
+   "date": "2026-11-22",
    "avg": {
     "ai92": 253,
     "ai95": 306,
