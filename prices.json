@@ -1,6 +1,6 @@
 {
  "date": "2026-11-22",
- "fetched": "2026-11-22T13:32+05:00",
+ "fetched": "2026-11-22T20:50+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -367,46 +367,6 @@
       "ai95": 298,
       "ai98": 345,
       "dt": 350
-     }
-    }
-   ]
-  },
-  "ust-kamenogorsk": {
-   "name": "Усть-Каменогорск",
-   "date": "2026-11-22",
-   "avg": {
-    "ai92": 255,
-    "ai95": 314,
-    "ai98": 341,
-    "dt": 357
-   },
-   "networks": [
-    {
-     "name": "Royal Petrol",
-     "stations": 11,
-     "prices": {
-      "ai92": 255,
-      "ai95": 314,
-      "dt": 357
-     }
-    },
-    {
-     "name": "Helios",
-     "stations": 8,
-     "prices": {
-      "ai92": 255,
-      "ai95": 314,
-      "ai98": 341,
-      "dt": 357
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 173,
-      "ai95": 185,
-      "dt": 186
      }
     }
    ]
