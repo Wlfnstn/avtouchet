@@ -1,6 +1,6 @@
 {
  "date": "2026-11-24",
- "fetched": "2026-11-24T14:52+05:00",
+ "fetched": "2026-11-24T20:34+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -187,58 +187,6 @@
       "ai98": 380,
       "dt": 355,
       "gas": 112
-     }
-    }
-   ]
-  },
-  "astana": {
-   "name": "Астана",
-   "date": "2026-11-24",
-   "avg": {
-    "ai92": 256,
-    "ai95": 318,
-    "ai98": 359,
-    "dt": 352
-   },
-   "networks": [
-    {
-     "name": "Qazaq Oil",
-     "stations": 20,
-     "prices": {
-      "ai92": 169,
-      "ai95": 188,
-      "ai98": 196,
-      "dt": 185
-     }
-    },
-    {
-     "name": "Helios",
-     "stations": 14,
-     "prices": {
-      "ai92": 258,
-      "ai95": 317,
-      "ai98": 357,
-      "dt": 351
-     }
-    },
-    {
-     "name": "Алатау Премиум Мунай",
-     "stations": 7,
-     "prices": {
-      "ai92": 257,
-      "ai95": 316,
-      "ai98": 355,
-      "dt": 355
-     }
-    },
-    {
-     "name": "Compass",
-     "stations": 3,
-     "prices": {
-      "ai92": 253,
-      "ai95": 321,
-      "ai98": 365,
-      "dt": 351
      }
     }
    ]
