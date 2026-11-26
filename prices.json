@@ -1,6 +1,6 @@
 {
  "date": "2026-11-26",
- "fetched": "2026-11-26T13:10+05:00",
+ "fetched": "2026-11-26T19:54+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -534,39 +534,6 @@
       "ai95": 189,
       "ai98": 199,
       "dt": 185
-     }
-    }
-   ]
-  },
-  "uralsk": {
-   "name": "Уральск",
-   "date": "2026-11-26",
-   "avg": {
-    "ai92": 201,
-    "ai95": 255,
-    "ai98": 199,
-    "dt": 259,
-    "gas": 85
-   },
-   "networks": [
-    {
-     "name": "НЕФТЭК",
-     "stations": 8,
-     "prices": {
-      "ai92": 235,
-      "ai95": 329,
-      "dt": 336,
-      "gas": 85
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 166,
-      "ai95": 180,
-      "ai98": 199,
-      "dt": 181
      }
     }
    ]
