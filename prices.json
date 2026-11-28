@@ -1,6 +1,6 @@
 {
  "date": "2026-11-28",
- "fetched": "2026-11-28T12:08+05:00",
+ "fetched": "2026-11-28T13:24+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -274,61 +274,6 @@
     }
    ]
   },
-  "karaganda": {
-   "name": "Караганда",
-   "date": "2026-11-28",
-   "avg": {
-    "ai92": 256,
-    "ai95": 315,
-    "ai98": 341,
-    "dt": 347,
-    "gas": 110
-   },
-   "networks": [
-    {
-     "name": "ГазOilПром",
-     "stations": 18,
-     "prices": {
-      "ai92": 258,
-      "ai95": 316,
-      "ai98": 344,
-      "dt": 345,
-      "gas": 112
-     }
-    },
-    {
-     "name": "Helios",
-     "stations": 12,
-     "prices": {
-      "ai92": 258,
-      "ai95": 316,
-      "ai98": 337,
-      "dt": 351,
-      "gas": 106
-     }
-    },
-    {
-     "name": "LIQUI MOLY",
-     "stations": 10,
-     "prices": {
-      "ai92": 252,
-      "ai95": 314,
-      "dt": 345,
-      "gas": 112
-     }
-    },
-    {
-     "name": "Qazaq Oil",
-     "stations": null,
-     "prices": {
-      "ai92": 170,
-      "ai95": 189,
-      "ai98": 199,
-      "dt": 186
-     }
-    }
-   ]
-  },
   "aktobe": {
    "name": "Актобе",
    "date": "2026-11-28",
@@ -357,6 +302,38 @@
       "ai95": 298,
       "ai98": 345,
       "dt": 350
+     }
+    }
+   ]
+  },
+  "atyrau": {
+   "name": "Атырау",
+   "date": "2026-11-28",
+   "avg": {
+    "ai92": 199,
+    "ai95": 238,
+    "ai98": 337,
+    "dt": 263
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 10,
+     "prices": {
+      "ai92": 239,
+      "ai95": 296,
+      "ai98": 337,
+      "dt": 347
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 159,
+      "ai95": 180,
+      "ai98": 194,
+      "dt": 179
      }
     }
    ]
@@ -464,6 +441,38 @@
     }
    ]
   },
+  "kyzylorda": {
+   "name": "Кызылорда",
+   "date": "2026-11-28",
+   "avg": {
+    "ai92": 214,
+    "ai95": 248,
+    "dt": 269,
+    "gas": 95
+   },
+   "networks": [
+    {
+     "name": "Helios",
+     "stations": 5,
+     "prices": {
+      "ai92": 259,
+      "ai95": 306,
+      "dt": 353,
+      "gas": 95
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 169,
+      "ai95": 189,
+      "ai98": 199,
+      "dt": 185
+     }
+    }
+   ]
+  },
   "uralsk": {
    "name": "Уральск",
    "date": "2026-11-28",
@@ -526,6 +535,28 @@
       "ai95": 324,
       "ai98": 365,
       "dt": 359
+     }
+    }
+   ]
+  },
+  "taraz": {
+   "name": "Тараз",
+   "date": "2026-11-28",
+   "avg": {
+    "ai92": 255,
+    "ai95": 307,
+    "dt": 363,
+    "gas": 107
+   },
+   "networks": [
+    {
+     "name": "Royal Petrol",
+     "stations": null,
+     "prices": {
+      "ai92": 255,
+      "ai95": 307,
+      "dt": 363,
+      "gas": 107
      }
     }
    ]
