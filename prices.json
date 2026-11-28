@@ -1,6 +1,6 @@
 {
  "date": "2026-11-28",
- "fetched": "2026-11-28T13:24+05:00",
+ "fetched": "2026-11-28T19:25+05:00",
  "source": "creditbureau.kz",
  "sourceUrl": "https://creditbureau.kz/gas-stations/",
  "avg": {
@@ -270,6 +270,61 @@
       "ai95": 186,
       "ai98": 199,
       "dt": 181
+     }
+    }
+   ]
+  },
+  "karaganda": {
+   "name": "Караганда",
+   "date": "2026-11-28",
+   "avg": {
+    "ai92": 256,
+    "ai95": 315,
+    "ai98": 341,
+    "dt": 347,
+    "gas": 110
+   },
+   "networks": [
+    {
+     "name": "ГазOilПром",
+     "stations": 18,
+     "prices": {
+      "ai92": 258,
+      "ai95": 316,
+      "ai98": 344,
+      "dt": 345,
+      "gas": 112
+     }
+    },
+    {
+     "name": "Helios",
+     "stations": 12,
+     "prices": {
+      "ai92": 258,
+      "ai95": 316,
+      "ai98": 337,
+      "dt": 351,
+      "gas": 106
+     }
+    },
+    {
+     "name": "LIQUI MOLY",
+     "stations": 10,
+     "prices": {
+      "ai92": 252,
+      "ai95": 314,
+      "dt": 345,
+      "gas": 112
+     }
+    },
+    {
+     "name": "Qazaq Oil",
+     "stations": null,
+     "prices": {
+      "ai92": 170,
+      "ai95": 189,
+      "ai98": 199,
+      "dt": 186
      }
     }
    ]
